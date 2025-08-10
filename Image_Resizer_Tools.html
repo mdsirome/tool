@@ -7,43 +7,34 @@
   <link rel="icon" href="https://i.postimg.cc/d1hHy4ss/11.png" type="image/x-icon" />
   <title>Image Resizer</title>
   <style>
-  
-    html, body {
-  overflow-x: hidden; /* ✅ Prevent horizontal scroll */
-}
+    html, body { overflow-x: hidden; }
     body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
-  background-attachment: fixed;
-  background-size: cover;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  user-select: none;
-  padding: 2rem;
-  box-shadow: inset 0 0 30px #000;
-}
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
+      background-attachment: fixed;
+      background-size: cover;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+      padding: 2rem;
+      box-shadow: inset 0 0 30px #000;
     }
-
+    h1 { text-align: center; margin-bottom: 20px; }
     .container {
-  max-width: 500px;
-  width: 100%;
-  background: #1b1b1b;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 
-    0 0 20px rgba(0, 0, 0, 0.9),
-    inset 0 0 10px rgba(255, 255, 255, 0.05),
-    0 10px 30px rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(5px);
-  transform: perspective(900px) rotateX(1deg);
-}
-
+      max-width: 500px;
+      width: 100%;
+      background: #1b1b1b;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 
+        0 0 20px rgba(0, 0, 0, 0.9),
+        inset 0 0 10px rgba(255, 255, 255, 0.05),
+        0 10px 30px rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      transform: perspective(900px) rotateX(1deg);
+    }
     button, select, input {
       width: 95%;
       padding: 10px;
@@ -52,33 +43,18 @@
       border-radius: 5px;
       font-size: 1rem;
     }
-
-    button {
-      background-color: #4a90e2;
-      color: white;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #357abd;
-    }
-
-    .preview {
-     margin-top: 20px;
-     text-align: center;
-     overflow-x: auto;   /* ✅ enables horizontal scroll if image is wide */
-}
-
+    button { background-color: #4a90e2; color: white; cursor: pointer; }
+    button:hover { background-color: #357abd; }
+    .preview { margin-top: 20px; text-align: center; overflow-x: auto; }
     #preview, #canvas {
-  display: block;
-  margin: 1rem auto 0 auto;
-  max-width: 100%;         /* ✅ Image will not overflow container */
-  max-height: 400px;
-  height: auto;
-  width: auto;
-  border-radius: 10px;
-}
-
+      display: block;
+      margin: 1rem auto 0 auto;
+      max-width: 100%;
+      max-height: 400px;
+      height: auto;
+      width: auto;
+      border-radius: 10px;
+    }
     #downloadLink {
       display: inline-block;
       background-color: #28a745;
@@ -90,15 +66,8 @@
       font-weight: bold;
       cursor: pointer;
     }
-
-    #downloadLink:hover {
-      background-color: #218838;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 0.3rem;
-    }
+    #downloadLink:hover { background-color: #218838; }
+    label { display: block; margin-bottom: 0.3rem; }
   </style>
 </head>
 <body>
@@ -134,7 +103,7 @@
       <option value="jpeg">JPG</option>
       <option value="original">Original</option>
     </select>
-
+<br><br>
     <button onclick="resizeImage()">Resize Image</button>
 
     <div class="preview">
@@ -142,6 +111,8 @@
       <canvas id="canvas" style="display:none;"></canvas>
       <img id="preview" src="https://i.postimg.cc/d1hHy4ss/11.png" alt="Preview Image" />
       <a id="downloadLink" style="display:none;" download>⬇ Download Resized Image</a>
+      <button id="uploadPostimages" style="display:none;background-color:#ff9800;">☁ Upload to Postimages</button>
+      <input type="text" id="directLinkBox" readonly style="display:none;width:95%;padding:10px;margin-top:5px;border-radius:5px;border:none;" onclick="this.select();document.execCommand('copy');alert('Link copied!')" />
     </div>
   </div>
 
@@ -179,6 +150,8 @@
         document.getElementById('preview').src = src;
         document.getElementById('canvas').style.display = 'none';
         document.getElementById('downloadLink').style.display = 'none';
+        document.getElementById('uploadPostimages').style.display = 'none';
+        document.getElementById('directLinkBox').style.display = 'none';
       };
       originalImage.src = src;
     }
@@ -241,13 +214,54 @@
       downloadLink.href = dataURL;
       downloadLink.download = `Sirome_TV.${fileExtension}`;
       downloadLink.style.display = 'inline-block';
+
+      document.getElementById('uploadPostimages').style.display = 'inline-block';
     }
 
     function resetPreview() {
       document.getElementById('preview').src = 'https://i.postimg.cc/d1hHy4ss/11.png';
       document.getElementById('canvas').style.display = 'none';
       document.getElementById('downloadLink').style.display = 'none';
+      document.getElementById('uploadPostimages').style.display = 'none';
+      document.getElementById('directLinkBox').style.display = 'none';
     }
+
+    // Upload to Postimages
+    document.getElementById('uploadPostimages').addEventListener('click', function () {
+      const canvas = document.getElementById('canvas');
+      canvas.toBlob(function(blob) {
+        const formData = new FormData();
+        formData.append('token', '61aa06d6116f7331ad7b2ba9c7fb707ec9b182e8');
+        formData.append('upload_session', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+        formData.append('numfiles', '1');
+        formData.append('upload_referer', 'https://getsharex.com/');
+        formData.append('file', blob, 'image.png');
+
+        fetch('https://postimg.cc/json', {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(result => {
+          if (result && result.url) {
+            document.getElementById('directLinkBox').value = result.url;
+            document.getElementById('directLinkBox').style.display = 'block';
+            navigator.clipboard.writeText(result.url);
+            alert('Upload successful! Direct link copied.');
+
+            // ✅ আপলোড হওয়ার পর সরাসরি নতুন ট্যাবে খুলবে
+            window.open(result.url, "_blank");
+          } else {
+            alert('Upload failed!');
+            console.log(result);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error uploading image.');
+        });
+      }, 'image/png');
+    });
   </script>
 </body>
 </html>
