@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Image Resizer — Updated UI</title>
+<style>
+  :root {
+    --bg1: #0f0f0f;
+    --bg2: #161616;
+    --card: #1b1b1b;
+    --accent: #4a90e2;
+    --accent-2: #357abd;
+    --muted: #9aa3ad;
+    --success: #28a745;
+    --orange: #ff9800;
+    --red: #e74c3c;
+    --yellow: #f39c12;
+    --purple: #8e44ad;
+    --gray: #607d8b;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 28px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 640px;
+    background: rgba(27, 27, 27, 0.72);
+    border-radius: 14px;
+    padding: 18px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  h1 {
+    margin: 6px 0 14px;
+    text-align: center;
+    font-size: 1.25rem;
+  }
+
+  label {
+    display: block;
+    margin: 8px 0 4px;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  input[type="file"],
+  input[type="text"],
+  input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.02);
+    color: #fff;
+    outline: none;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+
+  .row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .row .col {
+    flex: 1;
+  }
+
+  /* Lock Aspect Ratio Toggle */
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 6px 0 10px;
+  }
+
+  .toggle-label {
+    color: var(--muted);
+    font-size: 0.95rem;
+    user-select: none;
+  }
+
+  .switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: #555;
+    border-radius: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .switch .dot {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: 0.22s;
+  }
+
+  .switch.on {
+    background: var(--success);
+  }
+
+  .switch.on .dot {
+    left: 26px;
+  }
+
+  /* Buttons group */
+  .btn {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    user-select: none;
+    transition: all 0.15s ease-in-out;
+  }
+
+  .main-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(74, 144, 226, 0.12);
+  }
+
+  .main-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(53, 123, 189, 0.4);
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin: 8px 0;
+  }
+
+  .btn-row .btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  /* Quick Size Buttons */
+  .size-btn {
+    background: linear-gradient(135deg, #ff7043, #f4511e);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .size-btn:hover {
+    filter: brightness(1.15);
+  }
+
+  /* Background fill buttons */
+  .bg-fill-btn {
+    flex: 1;
+    background: #333;
+    color: #eee;
+  }
+
+  .bg-fill-btn.active {
+    background: var(--accent);
+    box-shadow: 0 6px 15px rgba(74, 144, 226, 0.4);
+  }
+
+  .bg-fill-btn:hover:not(.active) {
+    background: #555;
+  }
+
+  /* Color box next to color code */
+  .color-indicator {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    vertical-align: middle;
+    border-radius: 6px;
+    margin-left: 10px;
+    border: 1.8px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Format buttons */
+  .format-btn {
+    font-weight: 700;
+    color: #fff;
+    border-radius: 10px;
+    border: none;
+  }
+
+  .format-btn[data-format="png"] {
+    background: linear-gradient(135deg, #2fbd66, #169c44);
+  }
+
+  .format-btn[data-format="jpeg"] {
+    background: linear-gradient(135deg, #f39c12, #d35400);
+  }
+
+  .format-btn[data-format="gif"] {
+    background: linear-gradient(135deg, #8e44ad, #6c3483);
+  }
+
+  .format-btn[data-format="original"] {
+    background: linear-gradient(135deg, #607d8b, #455a64);
+  }
+
+  .format-btn.active {
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.6), inset 0 0 0 3px rgba(255, 255, 255, 0.04);
+    transform: translateY(-3px);
+    outline: 2px solid rgba(255, 255, 255, 0.03);
+  }
+
+  .format-btn:hover:not(.active) {
+    filter: brightness(1.15);
+  }
+
+  /* Preview */
+  .preview {
+    margin-top: 18px;
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0));
+    border: 1px solid rgba(255, 255, 255, 0.03);
+  }
+
+  #preview {
+    max-width: 100%;
+    max-height: 420px;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Download */
+  #downloadLink {
+    display: inline-block;
+    width: 100%;
+    text-decoration: none;
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #20c997, var(--success));
+    color: #fff;
+    font-weight: 800;
+    user-select: none;
+    transition: all 0.2s ease-in-out;
+  }
+
+  #downloadLink:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(40, 167, 69, 0.12);
+  }
+
+  /* Upload */
+  #uploadPostimages {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--orange), #e67e00);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease-in-out;
+  }
+
+  #uploadPostimages:hover {
+    filter: brightness(1.1);
+  }
+
+  #directLinkBox {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    display: none;
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+    user-select: all;
+    font-size: 0.95rem;
+  }
+
+  .note {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  /* Responsive fix */
+  @media (max-width: 520px) {
+    .btn-row {
+      flex-direction: row;
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>📐 Image Resizer</h1>
+
+    <label>Select Image from Device:</label>
+    <input id="imageFile" type="file" accept="image/*" />
+
+    <label>Or Enter Image URL:</label>
+    <div class="row" style="margin-bottom: 6px;">
+      <div class="col">
+        <input id="imageURL" type="text" placeholder="Paste image URL here" />
+      </div>
+      <div style="width: 120px;">
+        <button class="btn main-btn" onclick="loadImageFromURL()">Load</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Width (px)</label>
+        <input id="widthInput" type="number" placeholder="Width" />
+      </div>
+      <div class="col">
+        <label>Height (px)</label>
+        <input id="heightInput" type="number" placeholder="Height" />
+      </div>
+    </div>
+
+    <!-- Lock Aspect Ratio Toggle -->
+    <div class="toggle" style="margin-bottom:4px;">
+      <div class="toggle-label" style="flex-grow:1;">Lock Aspect Ratio</div>
+      <div id="lockSwitch" class="switch on" onclick="toggleLock()">
+        <div class="dot"></div>
+      </div>
+    </div>
+
+    <!-- Quick Sizer Buttons BELOW toggle -->
+    <div>
+      <div style="font-size:0.95rem; color: var(--muted); margin-bottom:6px;">Quick Sizes</div>
+      <div class="btn-row" style="margin-bottom: 10px;">
+        <button class="btn size-btn" onclick="setSize(300,280)">300×280px</button>
+        <button class="btn size-btn" onclick="setSize(280,400)">280×400px</button>
+      </div>
+    </div>
+
+    <!-- Background fill buttons -->
+    <div>
+      <div style="font-size:0.95rem; color: var(--muted); margin-bottom:6px;">Background Fill</div>
+      <div class="btn-row" style="align-items:center; gap: 8px; margin-bottom:6px;">
+        <button id="bgTransparentBtn" class="btn bg-fill-btn active" onclick="setBgFill('transparent')">Transparent</button>
+        <button id="bgColorBtn" class="btn bg-fill-btn" onclick="setBgFill('color')">Pick a colour</button>
+        <input
+          id="bgColorPicker"
+          type="color"
+          value="#ffffff"
+          style="width: 50px; height: 36px; border-radius: 8px; border: none; display: none; cursor: pointer;"
+          title="Pick background color"
+          onchange="updateColorIndicator()"
+        />
+        <div id="colorCode" style="color: var(--muted); font-size: 0.95rem; user-select:none;"></div>
+        <div id="colorIndicator" class="color-indicator" title="Selected Background Color" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Save Format Buttons BELOW background fill -->
+    <div>
+      <div style="font-size:0.95rem; color: var(--muted); margin-bottom:6px;">Save Format</div>
+      <div class="btn-row" id="formatButtons">
+        <button class="btn format-btn" data-format="png" onclick="saveAs('png')">PNG</button>
+        <button class="btn format-btn" data-format="jpeg" onclick="saveAs('jpeg')">JPG</button>
+        <button class="btn format-btn" data-format="gif" onclick="saveAs('gif')">GIF</button>
+        <button class="btn format-btn" data-format="original" onclick="saveAs('original')">Original</button>
+      </div>
+    </div>
+
+    <!-- Resize and Reset buttons -->
+    <div style="margin-top:14px;">
+      <button class="btn main-btn" onclick="resizeImage()">Resize Image</button>
+      <button
+        class="btn"
+        style="margin-top:8px; background: rgba(255, 255, 255, 0.03); font-weight: 700;"
+        onclick="resetPreview()"
+      >
+        🔄 Reset Preview
+      </button>
+    </div>
+
+    <!-- Preview Image -->
+    <div class="preview" id="previewBox" style="margin-top: 14px;">
+      <canvas id="canvas" style="display:none;"></canvas>
+      <img
+        id="preview"
+        src="https://i.postimg.cc/d1hHy4ss/11.png"
+        alt="Preview Image"
+        draggable="false"
+      />
+      <a id="downloadLink" style="display:none" download>⬇ Download Resized Image</a>
+      <button id="uploadPostimages" style="display:none" onclick="uploadToPostimages()">☁ Upload To Postimage</button>
+      <input
+        id="directLinkBox"
+        readonly
+        onclick="copyDirectLink()"
+        title="Click to copy link"
+        style="display:none"
+      />
+      <div class="note" style="margin-top:4px;">
+        Upload opens postimages link in a new tab & copies the direct link automatically.
+      </div>
+    </div>
+  </div>
+
+<script>
+  // State variables
+  let originalImage = new Image();
+  let originalFormat = "image/png";
+  let currentFormat = "png";
+  let aspectRatio = 1;
+  let lockAspect = true;
+  let bgFillMode = "transparent";
+
+  // Elements cache
+  const lockSwitch = document.getElementById("lockSwitch");
+  const bgTransparentBtn = document.getElementById("bgTransparentBtn");
+  const bgColorBtn = document.getElementById("bgColorBtn");
+  const bgColorPicker = document.getElementById("bgColorPicker");
+  const colorCode = document.getElementById("colorCode");
+  const colorIndicator = document.getElementById("colorIndicator");
+
+  // Set active format button
+  function setActiveFormatButton(fmt) {
+    document.querySelectorAll(".format-btn").forEach((b) => {
+      if (b.dataset.format === fmt) {
+        b.classList.add("active");
+        b.setAttribute("aria-pressed", "true");
+      } else {
+        b.classList.remove("active");
+        b.setAttribute("aria-pressed", "false");
+      }
+    });
+  }
+
+  setActiveFormatButton(currentFormat);
+
+  // Toggle lock aspect ratio
+  function toggleLock() {
+    lockAspect = !lockAspect;
+    if (lockAspect) {
+      lockSwitch.classList.add("on");
+    } else {
+      lockSwitch.classList.remove("on");
+    }
+  }
+
+  // Load image from file input
+  document.getElementById("imageFile").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    originalFormat = file.type || originalFormat;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      loadImage(evt.target.result, originalFormat);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Load image from URL
+  function inferFormatFromUrl(url) {
+    try {
+      let p = url.split("?")[0].split("#")[0].toLowerCase();
+      if (p.match(/\.(jpe?g)$/)) return "image/jpeg";
+      if (p.match(/\.png$/)) return "image/png";
+      if (p.match(/\.gif$/)) return "image/gif";
+      return "image/png";
+    } catch {
+      return "image/png";
+    }
+  }
+
+  function loadImageFromURL() {
+    const url = document.getElementById("imageURL").value.trim();
+    if (!url) return alert("Please enter a valid image URL.");
+    originalFormat = inferFormatFromUrl(url);
+    loadImage(url, originalFormat);
+  }
+
+  function loadImage(src, format) {
+    originalImage = new Image();
+    originalImage.crossOrigin = "anonymous";
+    originalImage.onload = () => {
+      aspectRatio = originalImage.width / originalImage.height;
+      document.getElementById("widthInput").value = originalImage.width;
+      document.getElementById("heightInput").value = originalImage.height;
+      updatePreview(src);
+      currentFormat = format.includes("jpeg") ? "jpeg" : format.includes("gif") ? "gif" : "png";
+      setActiveFormatButton(currentFormat);
+    };
+    originalImage.onerror = () => alert("Failed to load image. Try a different URL or file.");
+    originalImage.src = src;
+  }
+
+  // Quick Size buttons
+  function setSize(w, h) {
+    document.getElementById("widthInput").value = w;
+    document.getElementById("heightInput").value = h;
+    if (lockAspect) {
+      document.getElementById("heightInput").value = Math.round(w / aspectRatio);
+    }
+  }
+
+  // Aspect ratio lock sync inputs
+  document.getElementById("widthInput").addEventListener("input", function () {
+    let w = parseInt(this.value) || 0;
+    if (lockAspect && w > 0) {
+      document.getElementById("heightInput").value = Math.round(w / aspectRatio);
+    }
+  });
+
+  document.getElementById("heightInput").addEventListener("input", function () {
+    let h = parseInt(this.value) || 0;
+    if (lockAspect && h > 0) {
+      document.getElementById("widthInput").value = Math.round(h * aspectRatio);
+    }
+  });
+
+  // Background fill
+  function setBgFill(mode) {
+    bgFillMode = mode;
+    if (mode === "transparent") {
+      bgTransparentBtn.classList.add("active");
+      bgColorBtn.classList.remove("active");
+      bgColorPicker.style.display = "none";
+      colorCode.style.display = "none";
+      colorIndicator.style.display = "none";
+    } else if (mode === "color") {
+      bgTransparentBtn.classList.remove("active");
+      bgColorBtn.classList.add("active");
+      bgColorPicker.style.display = "inline-block";
+      updateColorIndicator();
+      colorCode.style.display = "inline-block";
+      colorIndicator.style.display = "inline-block";
+    }
+  }
+
+  function updateColorIndicator() {
+    const c = bgColorPicker.value;
+    colorCode.textContent = c.toUpperCase();
+    colorIndicator.style.backgroundColor = c;
+  }
+
+  // Save Format buttons
+  function saveAs(format) {
+    currentFormat = format;
+    setActiveFormatButton(format);
+  }
+
+  // Resize Image function
+  function resizeImage() {
+    const width = parseInt(document.getElementById("widthInput").value) || originalImage.width;
+    const height = parseInt(document.getElementById("heightInput").value) || originalImage.height;
+
+    const canvas = document.getElementById("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+
+    // Clear
+    ctx.clearRect(0, 0, width, height);
+
+    // Fill background
+    if (bgFillMode === "color") {
+      ctx.fillStyle = bgColorPicker.value;
+      ctx.fillRect(0, 0, width, height);
+    } else if (bgFillMode === "transparent") {
+      ctx.clearRect(0, 0, width, height);
+    }
+
+    ctx.drawImage(originalImage, 0, 0, width, height);
+
+    // Prepare data URL for download
+    let mimeType = "image/png";
+    if (currentFormat === "jpeg") mimeType = "image/jpeg";
+    else if (currentFormat === "gif") mimeType = "image/gif";
+
+    const dataURL = canvas.toDataURL(mimeType);
+
+    // Update preview img
+    const preview = document.getElementById("preview");
+    preview.src = dataURL;
+
+    // Show download link
+    const downloadLink = document.getElementById("downloadLink");
+    downloadLink.href = dataURL;
+    downloadLink.download = resized-image.${currentFormat === "original" ? getExtension(originalFormat) : currentFormat};
+    downloadLink.style.display = "inline-block";
+    downloadLink.textContent = ⬇ Download ${currentFormat.toUpperCase() === "ORIGINAL" ? getExtension(originalFormat).toUpperCase() : currentFormat.toUpperCase()};
+    
+    // Show Upload button
+    document.getElementById("uploadPostimages").style.display = "inline-block";
+    document.getElementById("directLinkBox").style.display = "none";
+  }
+
+  // Reset Preview
+  function resetPreview() {
+    document.getElementById("widthInput").value = originalImage.width;
+    document.getElementById("heightInput").value = originalImage.height;
+    updatePreview(originalImage.src);
+    currentFormat = "png";
+    setActiveFormatButton(currentFormat);
+    setBgFill("transparent");
+    document.getElementById("downloadLink").style.display = "none";
+    document.getElementById("uploadPostimages").style.display = "none";
+    document.getElementById("directLinkBox").style.display = "none";
+  }
+
+  function updatePreview(src) {
+    const preview = document.getElementById("preview");
+    preview.src = src;
+  }
+
+  // Helper to get extension from MIME type
+  function getExtension(mime) {
+    if (!mime) return "png";
+    if (mime.indexOf("jpeg") !== -1) return "jpg";
+    if (mime.indexOf("png") !== -1) return "png";
+    if (mime.indexOf("gif") !== -1) return "gif";
+    return "png";
+  }
+
+  // Upload to Postimages.cc
+  async function uploadToPostimages() {
+    const canvas = document.getElementById("canvas");
+    if (!canvas.width || !canvas.height) {
+      alert("Please resize the image first.");
+      return;
+    }
+    const blob = await new Promise((res) => canvas.toBlob(res));
+    if (!blob) {
+      alert("Failed to get image blob.");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("upload", blob, resized-image.${currentFormat});
+
+    // Use CORS proxy or your own backend to upload, because direct POST to postimages may not work due to CORS
+    // Here is a sample placeholder for uploading, you should replace this with your actual API or proxy
+    alert("Upload function placeholder — please integrate your own upload API or proxy.");
+  }
+
+  // Copy direct link box
+  function copyDirectLink() {
+    const dl = document.getElementById("directLinkBox");
+    dl.select();
+    dl.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(dl.value).then(() => {
+      alert("Direct link copied to clipboard!");
+    });
+  }
+
+  // Initialize default state
+  window.onload = () => {
+    loadImage("https://i.postimg.cc/d1hHy4ss/11.png", "image/png");
+    setBgFill("transparent");
+  };
+</script>
+</body>
+</html>
