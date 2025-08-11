@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Image Resizer — Updated</title>
+<style>
+  :root{
+    --bg1:#0f0f0f; --bg2:#161616; --card:#1b1b1b;
+    --accent:#4a90e2; --accent-2:#357abd; --muted:#9aa3ad;
+    --success:#28a745; --orange:#ff9800;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    color:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:28px;
+  }
+
+  .container{
+    width:100%;
+    max-width:640px;
+    background: rgba(27,27,27,0.72);
+    border-radius:14px;
+    padding:18px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  }
+
+  h1{margin:6px 0 14px; text-align:center; font-size:1.25rem}
+  label{display:block; margin:8px 0 4px; color:var(--muted); font-size:0.95rem}
+
+  input[type="file"], input[type="text"], input[type="number"], select, input[type="color"]{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.02);
+    color:#fff;
+    outline:none;
+    font-size:0.95rem;
+    margin-bottom:8px;
+  }
+
+  .row {
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .row .col { flex:1; }
+
+  .toggle{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:6px 0 12px;
+  }
+  .toggle-label{color:var(--muted); font-size:0.95rem}
+  .switch{
+    position:relative;
+    width:50px;height:26px;
+    background:#555;border-radius:20px;cursor:pointer;
+  }
+  .switch .dot{
+    position:absolute; width:22px;height:22px; background:#fff;border-radius:50%;
+    top:2px; left:2px; transition:0.22s;
+  }
+  .switch.on{background:#4caf50}
+  .switch.on .dot{left:26px}
+
+  /* Buttons group */
+  .btn { padding:10px 12px; border-radius:10px; border:none; cursor:pointer; font-weight:600; }
+  .main-btn{ width:100%; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; box-shadow:0 6px 18px rgba(74,144,226,0.12); }
+  .main-btn:hover{ transform:translateY(-2px) }
+
+  .btn-row{ display:flex; gap:10px; margin:10px 0; }
+  .btn-row .btn { flex:1; text-align:center; }
+
+  /* format buttons */
+  .format-btn{ background:linear-gradient(135deg,#2fbd66,#169c44); color:#fff; font-weight:700 }
+  .format-btn[data-format="jpeg"]{ background:linear-gradient(135deg,#f39c12,#d35400) } /* nicer for JPG */
+  .format-btn[data-format="gif"]{ background:linear-gradient(135deg,#8e44ad,#6c3483) }
+  .format-btn[data-format="original"]{ background:linear-gradient(135deg,#607d8b,#455a64) }
+
+  .format-btn.active{
+    box-shadow:0 10px 50px rgba(0,0,0,0.6), inset 0 0 0 3px rgba(255,255,255,0.04);
+    transform:translateY(-3px);
+    outline: 3px solid white;
+  }
+
+  /* size buttons */
+  .size-btn{ background:linear-gradient(135deg,#ff7043,#f4511e); color:#fff; font-weight:700; }
+
+  /* preview */
+  .preview{
+    margin-top:12px;
+    text-align:center;
+    padding:12px;
+    border-radius:10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+  #preview{ max-width:100%; max-height:420px; border-radius:8px; display:block; margin:0 auto 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+
+  /* download / upload */
+  #downloadLink{
+    display:inline-block;
+    width:100%;
+    text-decoration:none;
+    text-align:center;
+    padding:12px;
+    border-radius:10px;
+    background: linear-gradient(135deg,#20c997,#28a745);
+    color:#fff; font-weight:800;
+  }
+  #downloadLink:hover{ transform:translateY(-3px); box-shadow:0 14px 30px rgba(40,167,69,0.12) }
+
+  #uploadPostimages{
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border-radius:10px;
+    background:linear-gradient(135deg,var(--orange),#e67e00);
+    color:#fff; font-weight:700; border:none; cursor:pointer;
+  }
+
+  #directLinkBox{
+    margin-top:10px; width:100%; padding:10px; border-radius:8px; border:none; display:none;
+    background:rgba(255,255,255,0.03); color:#fff; text-align:center; cursor:pointer;
+  }
+
+  /* small foot */
+  .note{ margin-top:8px; color:var(--muted); font-size:0.85rem; text-align:center; }
+
+  @media (max-width:520px){
+    .btn-row{flex-direction:row; gap:8px}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📐 Image Resizer</h1>
+
+  <label>Select Image from Device:</label>
+  <input id="imageFile" type="file" accept="image/*">
+
+  <label>Or Enter Image URL:</label>
+  <div class="row" style="margin-bottom:6px">
+    <div class="col"><input id="imageURL" type="text" placeholder="Paste image URL here"></div>
+    <div style="width:120px"><button class="btn main-btn" onclick="loadImageFromURL()">Load</button></div>
+  </div>
+
+  <div class="row">
+    <div class="col"><label>Width (px)</label><input id="widthInput" type="number" placeholder="Width"></div>
+    <div class="col"><label>Height (px)</label><input id="heightInput" type="number" placeholder="Height"></div>
+  </div>
+
+  <div class="toggle">
+    <div class="toggle-label">Lock Aspect Ratio</div>
+    <div id="lockSwitch" class="switch on" onclick="toggleLock()"><div class="dot"></div></div>
+  </div>
+
+  <label>Background Fill</label>
+  <div class="row" style="align-items:center">
+    <div class="col">
+      <select id="bgFill">
+        <option value="transparent">Transparent</option>
+        <option value="color">Pick a Color</option>
+      </select>
+    </div>
+    <div style="width:110px"><input id="bgColorPicker" type="color" value="#ffffff" style="display:none"></div>
+  </div>
+
+  <div style="margin-top:8px">
+    <div style="display:flex; gap:10px; align-items:center; justify-content:space-between">
+      <div style="flex:1">
+        <div style="font-size:0.95rem; color:var(--muted); margin-bottom:6px">Quick Sizes</div>
+        <div class="btn-row">
+          <button class="btn size-btn" onclick="setSize(300,180)">300×180px</button>
+          <button class="btn size-btn" onclick="setSize(280,800)">280×800px</button>
+        </div>
+      </div>
+      <div style="width:16px"></div>
+    </div>
+  </div>
+
+  <div style="margin-top:10px">
+    <button class="btn main-btn" onclick="resizeImage()">Resize Image</button>
+    <button class="btn" style="margin-top:8px;background:red; font-weight:700" onclick="resetPreview()">🔄 Reset Preview</button>
+  </div>
+
+  <div style="margin-top:14px">
+    <div style="font-size:0.95rem; color:var(--muted); margin-bottom:6px">Save Format</div>
+    <div class="btn-row" id="formatButtons">
+      <button class="btn format-btn" data-format="png" onclick="saveAs('png')">PNG</button>
+      <button class="btn format-btn" data-format="jpeg" onclick="saveAs('jpeg')">JPG</button>
+      <button class="btn format-btn" data-format="gif" onclick="saveAs('gif')">GIF</button>
+      <button class="btn format-btn" data-format="original" onclick="saveAs('original')">Original</button>
+    </div>
+  </div>
+
+  <div class="preview" id="previewBox">
+    <canvas id="canvas" style="display:none"></canvas>
+    <img id="preview" src="https://i.postimg.cc/d1hHy4ss/11.png" alt="Preview Image">
+    <a id="downloadLink" style="display:none" download>⬇ Download Resized Image</a>
+    <button id="uploadPostimages" style="display:none" onclick="uploadToPostimages()">☁ Upload To Postimage</button>
+    <input id="directLinkBox" readonly onclick="copyDirectLink()" title="Click to copy link">
+    <div class="note">Upload opens postimages link in a new tab & copies the direct link automatically.</div>
+  </div>
+</div>
+
+<script>
+/* State */
+let originalImage = new Image();
+let originalFormat = 'image/png';   // mime type when known
+let currentFormat = 'png';          // active format button
+let aspectRatio = 1;
+let lockAspect = true;
+
+/* Helpers */
+function setActiveFormatButton(fmt){
+  document.querySelectorAll('.format-btn').forEach(b=>{
+    if(b.dataset.format === fmt){
+      b.classList.add('active');
+      b.setAttribute('aria-pressed','true');
+    } else {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed','false');
+    }
+  });
+}
+
+/* Init default active format */
+setActiveFormatButton(currentFormat);
+
+/* Toggle lock UI */
+function toggleLock(){
+  lockAspect = !lockAspect;
+  const s = document.getElementById('lockSwitch');
+  if(lockAspect) s.classList.add('on'); else s.classList.remove('on');
+}
+
+/* File input */
+document.getElementById('imageFile').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  originalFormat = file.type || originalFormat;
+  const reader = new FileReader();
+  reader.onload = evt => {
+    loadImage(evt.target.result, originalFormat);
+  };
+  reader.readAsDataURL(file);
+});
+
+/* Load from URL - try infer format from extension */
+function inferFormatFromUrl(url){
+  try{
+    let p = url.split('?')[0].split('#')[0].toLowerCase();
+    if(p.match(/\.(jpe?g)$/)) return 'image/jpeg';
+    if(p.match(/\.png$/)) return 'image/png';
+    if(p.match(/\.gif$/)) return 'image/gif';
+  }catch(e){}
+  return null;
+}
+
+function loadImageFromURL(){
+  const url = document.getElementById('imageURL').value.trim();
+  if(!url){ alert('Please paste an image URL'); return; }
+  const inf = inferFormatFromUrl(url);
+  if(inf) originalFormat = inf;
+  loadImage(url, originalFormat);
+}
+
+/* Core load */
+function loadImage(src, mime){
+  originalImage = new Image();
+  originalImage.crossOrigin = 'Anonymous';
+  originalImage.onload = () => {
+    aspectRatio = originalImage.width / originalImage.height || 1;
+    document.getElementById('widthInput').value = originalImage.width;
+    document.getElementById('heightInput').value = originalImage.height;
+    // choose sensible currentFormat based on known mime
+    let pick = 'original';
+    if(mime){
+      if(mime.includes('png')) pick = 'png';
+      else if(mime.includes('jpeg') || mime.includes('jpg')) pick = 'jpeg';
+      else if(mime.includes('gif')) pick = 'gif';
+      else pick = 'original';
+    } else {
+      pick = 'original';
+    }
+    currentFormat = pick;
+    setActiveFormatButton(currentFormat);
+    // create preview in the picked format
+    resizeImage();
+  };
+  originalImage.onerror = ()=>{
+    alert('Image failed to load (maybe CORS or invalid URL). Try uploading the file instead.');
+  };
+  originalImage.src = src;
+}
+
+/* Input change handlers - maintain aspect */
+document.getElementById('widthInput').addEventListener('input', function(){
+  if(lockAspect && originalImage.width){
+    const w = parseInt(this.value) || 0;
+    document.getElementById('heightInput').value = Math.max(1, Math.round(w / aspectRatio));
+  }
+});
+document.getElementById('heightInput').addEventListener('input', function(){
+  if(lockAspect && originalImage.height){
+    const h = parseInt(this.value) || 0;
+    document.getElementById('widthInput').value = Math.max(1, Math.round(h * aspectRatio));
+  }
+});
+
+/* Background color picker toggling */
+document.getElementById('bgFill').addEventListener('change', function(){
+  const picker = document.getElementById('bgColorPicker');
+  picker.style.display = this.value === 'color' ? 'block' : 'none';
+});
+
+/* Quick size set */
+function setSize(w,h){
+  document.getElementById('widthInput').value = w;
+  document.getElementById('heightInput').value = h;
+  if(lockAspect && originalImage.width){
+    aspectRatio = originalImage.width / originalImage.height || aspectRatio;
+    // keep given sizes as fixed
+  }
+}
+
+/* Save format selection */
+function saveAs(fmt){
+  currentFormat = fmt;
+  setActiveFormatButton(fmt);
+  resizeImage();
+}
+
+/* Resize & preview */
+function resizeImage(){
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let width = parseInt(document.getElementById('widthInput').value) || originalImage.width || 1;
+  let height = parseInt(document.getElementById('heightInput').value) || originalImage.height || 1;
+
+  if(width <=0 || height <=0){ alert('Invalid width or height'); return; }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const bgFill = document.getElementById('bgFill').value;
+  const bgColor = document.getElementById('bgColorPicker').value;
+
+  if(bgFill === 'color'){
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0,0,width,height);
+  } else {
+    ctx.clearRect(0,0,width,height);
+  }
+
+  try {
+    ctx.drawImage(originalImage, 0, 0, width, height);
+  } catch(e){
+    console.error(e);
+    alert('Cannot draw image on canvas — cross-origin image may block this operation.');
+    return;
+  }
+
+  // determine mime
+  let mime = 'image/png';
+  if(currentFormat === 'jpeg') mime = 'image/jpeg';
+  else if(currentFormat === 'gif') mime = 'image/gif';
+  else if(currentFormat === 'original' && originalFormat) mime = originalFormat;
+  // update preview
+  let dataURL;
+  try {
+    dataURL = canvas.toDataURL(mime);
+  } catch(e){
+    // fallback to png
+    dataURL = canvas.toDataURL('image/png');
+    mime = 'image/png';
+  }
+  document.getElementById('preview').src = dataURL;
+
+  // set download link
+  const dl = document.getElementById('downloadLink');
+  let ext = currentFormat === 'original' && originalFormat ? (originalFormat.split('/')[1] || 'png') : (currentFormat === 'jpeg' ? 'jpg' : currentFormat);
+  if(ext === 'jpeg') ext = 'jpg';
+  dl.href = dataURL;
+  dl.download = Resized.${ext};
+  dl.style.display = 'inline-block';
+
+  // show upload button
+  document.getElementById('uploadPostimages').style.display = 'block';
+
+  // ensure format button reflects actual used mime (if original had different)
+  setActiveFormatButton(currentFormat);
+}
+
+/* Reset */
+function resetPreview(){
+  const defaultSrc = 'https://i.postimg.cc/d1hHy4ss/11.png';
+  document.getElementById('preview').src = defaultSrc;
+  document.getElementById('downloadLink').style.display = 'none';
+  document.getElementById('uploadPostimages').style.display = 'none';
+  document.getElementById('directLinkBox').style.display = 'none';
+  // reset inputs
+  document.getElementById('widthInput').value = '';
+  document.getElementById('heightInput').value = '';
+  currentFormat = 'png';
+  setActiveFormatButton(currentFormat);
+}
+
+/* Upload to Postimages */
+function uploadToPostimages(){
+  const canvas = document.getElementById('canvas');
+  // decide mime & ext for upload
+  let uploadMime = 'image/png';
+  if(currentFormat === 'jpeg') uploadMime = 'image/jpeg';
+  else if(currentFormat === 'gif') uploadMime = 'image/gif';
+  else if(currentFormat === 'original' && originalFormat) uploadMime = originalFormat;
+
+  let ext = uploadMime.split('/')[1] || 'png';
+  if(ext === 'jpeg') ext = 'jpg';
+
+  canvas.toBlob(function(blob){
+    if(!blob) { alert('Could not create image blob for upload'); return; }
+    const formData = new FormData();
+    // note: token & session strings were in your earlier code — keeping them as before
+    formData.append('token', '61aa06d6116f7331ad7b2ba9c7fb707ec9b182e8');
+    formData.append('upload_session', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    formData.append('numfiles', '1');
+    formData.append('upload_referer', 'https://getsharex.com/');
+    formData.append('file', blob, image.${ext});
+
+    fetch('https://postimg.cc/json', { method:'POST', body: formData })
+      .then(res => res.json())
+      .then(result => {
+        // Postimages returns structure — we earlier expected result.url
+        // Try to find direct link in response; otherwise use result.url or fallback
+        let url = null;
+        try {
+          // Some responses: result.url or result.images[0] or data.link
+          if(result && typeof result === 'object'){
+            if(result.url) url = result.url;
+            else if(result.image && result.image.url) url = result.image.url;
+            else if(result.images && result.images[0]) url = result.images[0];
+            // else try stringify to inspect
+          }
+        } catch(e){}
+        if(!url && result && result.data && result.data.file){
+          url = result.data.file;
+        }
+        if(url){
+          document.getElementById('directLinkBox').value = url;
+          document.getElementById('directLinkBox').style.display = 'block';
+          // copy & open
+          navigator.clipboard?.writeText(url).catch(()=>{});
+          window.open(url, '_blank');
+          alert('Upload successful — direct link copied to clipboard.');
+        } else {
+          // fallback: show full json for debugging (but user likely doesn't need)
+          console.warn('Upload result:', result);
+          alert('Upload finished but could not find direct link in response. Check console.');
+        }
+      })
+      .catch(err=>{
+        console.error(err);
+        alert('Error uploading image to Postimages.');
+      });
+  }, uploadMime);
+}
+
+/* direct link copy */
+function copyDirectLink(){
+  const box = document.getElementById('directLinkBox');
+  if(box.value){
+    navigator.clipboard?.writeText(box.value).then(()=> { alert('Link copied!'); }).catch(()=> { alert('Copy failed — select manually.'); });
+  }
+}
+
+/* set initial active format on load */
+setActiveFormatButton(currentFormat);
+</script>
+</body>
+</html>
