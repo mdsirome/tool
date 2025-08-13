@@ -1,3 +1,11 @@
+<!-- NOTE: 
+
+}, 'image/png'); এটা JS এ থাকলে , ছবি আপলোড হবে PNG ফরমেট, এখানে চাইলে পরিবর্তন করতে পারেন JPG তে। কিন্তু সেই জন্য ফরমেট হবে 'image/png', 'image/jpeg' ,'image/webp', 'image/webp' এরকম।  -->
+
+<!-- alert('Upload successful — direct link copied to clipboard (if allowed).'); এটা JS এ থাকলে ছবি আপলড হবার পর  এই Popup JS Notify দেখাবে, যদি এটা রিমুভ করি তাহলে ছবি আপলোড হয়ে সরাসরি Postimages এর  Direct চলে যাবে ।
+-->
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,6 +20,17 @@
 <title>Image Resizer — Sirome TV</title>
 <link rel="icon" href="https://i.postimg.cc/d1hHy4ss/11.png" />
 <style>
+    ::-webkit-scrollbar{
+     display: block;
+     width: 100%;
+     overflow: fixed;
+     height: 100%;
+}
+*{
+    -ms-overflow-style:none;
+    scrollbar-width:none
+}
+
   :root{
     --bg:#121212;
     --card:#1f1f1f;
@@ -781,7 +800,7 @@ uploadBtn.addEventListener('click', ()=>{
         alert('Error uploading image. Check console for details.');
       });
 
-  }, 'image/png');
+  }, 'image/jpeg');
 });
 
 /* -------------------------
