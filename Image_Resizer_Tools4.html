@@ -366,17 +366,22 @@
       
 <!-- File input + Drag Drop  + URL load -->
 <label class="small">Select Image from Device</label>
-<div id="dropZone" class="drop-zone">Drag & Drop image here or click below</div>
 <input id="fileInput" type="file" accept="image/*" aria-label="Choose image file">
+<div id="dropZone" class="drop-zone">Drag & Drop image here or click below</div>
+
       
       
 
 <label class="small">Or Enter Image URL</label>
-<div style="display:flex; gap:8px; margin-bottom:10px;">
-  <input id="urlInput" type="text" placeholder="https://example.com/image.jpg" aria-label="Image URL">
-  <button class="download-link" style="padding:8px 10px; min-width:72px;" id="btnLoad">Load</button>
-  <button class="download-link" style="padding:8px 10px; min-width:72px; background:linear-gradient(180deg,#00c853,#00bfa5);" id="btnPaste">Paste</button>
-  <button class="btn-reset" style="padding:8px 10px; min-width:72px;" id="btnClear">Clear</button>
+<div style="margin-bottom:10px;">
+  <input id="urlInput" type="text" placeholder="https://example.com/image.jpg" aria-label="Image URL" style="width:100%; margin-bottom:8px;">
+  
+  <!-- Buttons moved below input -->
+  <div style="display:flex; gap:8px; justify-content:center;">
+    <button class="download-link" style="padding:8px 10px; flex:1; min-width:72px;" id="btnLoad">Load</button>
+    <button class="download-link" style="padding:8px 10px; flex:1; min-width:72px; background:linear-gradient(180deg,#00c853,#00bfa5);" id="btnPaste">Paste</button>
+    <button class="btn-reset" style="padding:8px 10px; flex:1; min-width:72px;" id="btnClear">Clear</button>
+  </div>
 </div>
 
 
