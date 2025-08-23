@@ -231,6 +231,23 @@
             animation: float 15s infinite linear;
         }
         
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff0050, #00f2ea);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
         @keyframes float {
             0% {
                 transform: translateY(0) translateX(0) rotate(0deg);
@@ -286,6 +303,10 @@
         
         <button class="process-btn" id="processBtn"><i class="fas fa-cog"></i> Process Video</button>
         
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+        
         <p class="status-text" id="statusText"></p>
         
         <div class="download-section hidden" id="downloadSection">
@@ -323,6 +344,21 @@
             const captionText = document.getElementById('captionText');
             const copyBtn = document.getElementById('copyBtn');
             const statusText = document.getElementById('statusText');
+            const progressBar = document.getElementById('progressBar');
+            
+            // Example TikTok URLs for simulation
+            const exampleUrls = [
+                "https://www.tiktok.com/@user1/video/1234567890123456789",
+                "https://www.tiktok.com/@user2/video/9876543210987654321",
+                "https://www.tiktok.com/@user3/video/1122334455667788990"
+            ];
+            
+            // Example captions for simulation
+            const exampleCaptions = [
+                "Check out this amazing TikTok video! 😍 #viral #fyp #foryou #trending",
+                "This is so satisfying to watch! 🤩 #satisfying #oddlysatisfying #asmr",
+                "Never thought I could do this! 😎 #skills #talent #learnontiktok"
+            ];
             
             // Paste button functionality
             pasteBtn.addEventListener('click', async function() {
@@ -330,11 +366,14 @@
                     const text = await navigator.clipboard.readText();
                     urlInput.value = text;
                 } catch (err) {
-                    urlInput.value = 'https://www.tiktok.com/@example/video/1234567890';
-                    statusText.textContent = "Unable to read clipboard. Using example URL.";
+                    // Use a random example URL if clipboard is not accessible
+                    const randomUrl = exampleUrls[Math.floor(Math.random() * exampleUrls.length)];
+                    urlInput.value = randomUrl;
+                    statusText.textContent = "Using example URL. Paste your own TikTok URL for real processing.";
+                    statusText.style.color = "#00f2ea";
                     setTimeout(() => {
                         statusText.textContent = "";
-                    }, 3000);
+                    }, 5000);
                 }
             });
             
@@ -357,17 +396,8 @@
                 statusText.textContent = "Processing video...";
                 statusText.style.color = "#00f2ea";
                 
-                // Simulate processing delay
-                setTimeout(() => {
-                    statusText.textContent = "Video processed successfully!";
-                    
-                    // Show download section and caption
-                    downloadSection.classList.remove('hidden');
-                    captionSection.classList.remove('hidden');
-                    
-                    // Set example caption (in a real app, this would come from the API)
-                    captionText.textContent = "Check out this amazing TikTok video! 😍 #viral #fyp #foryou #trending";
-                }, 2000);
+                // Simulate processing with progress bar
+                simulateProcessing();
             });
             
             // Download button functionality
@@ -376,18 +406,7 @@
                 statusText.style.color = "#25d366";
                 
                 // Simulate download preparation
-                setTimeout(() => {
-                    statusText.textContent = "Download started!";
-                    
-                    // In a real application, this would trigger the actual download
-                    // For this example, we'll create a dummy download
-                    const a = document.createElement('a');
-                    a.href = '#'; // In a real app, this would be the video URL
-                    a.download = 'tiktok_video_no_watermark.mp4';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                }, 1000);
+                simulateDownload();
             });
             
             // Copy caption functionality
@@ -443,6 +462,53 @@
                     
                     particlesContainer.appendChild(particle);
                 }
+            }
+            
+            // Simulate processing with progress bar
+            function simulateProcessing() {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        statusText.textContent = "Video processed successfully!";
+                        
+                        // Show download section and caption
+                        downloadSection.classList.remove('hidden');
+                        captionSection.classList.remove('hidden');
+                        
+                        // Set example caption (in a real app, this would come from the API)
+                        const randomCaption = exampleCaptions[Math.floor(Math.random() * exampleCaptions.length)];
+                        captionText.textContent = randomCaption;
+                    }
+                }, 100);
+            }
+            
+            // Simulate download process
+            function simulateDownload() {
+                let progress = 0;
+                progressBar.style.width = "0%";
+                progressBar.style.backgroundColor = "#25d366";
+                
+                const interval = setInterval(() => {
+                    progress += 10;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        statusText.textContent = "Download complete!";
+                        
+                        // Create a temporary link to trigger download
+                        const a = document.createElement('a');
+                        a.href = 'https://example.com/tiktok-video.mp4'; // This would be the actual video URL
+                        a.download = 'tiktok_video_no_watermark.mp4';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }
+                }, 100);
             }
         });
     </script>
