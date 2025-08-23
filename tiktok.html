@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Video Downloader - No Watermark</title>
+    <title>Facebook ভিডিও ডাউনলোডার</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', 'Nirmala UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
@@ -45,11 +45,11 @@
         
         .logo h1 {
             font-size: 2.5rem;
-            background: linear-gradient(45deg, #ff0050, #00f2ea);
+            background: linear-gradient(45deg, #3b5998, #8b9dc3);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 0 2px 10px rgba(255, 0, 80, 0.3);
+            text-shadow: 0 2px 10px rgba(59, 89, 152, 0.3);
         }
         
         .logo p {
@@ -79,26 +79,26 @@
         
         .paste-btn {
             padding: 15px 20px;
-            background: linear-gradient(45deg, #00f2ea, #00c2ba);
+            background: linear-gradient(45deg, #8b9dc3, #3b5998);
             border: none;
             border-radius: 0 12px 12px 0;
-            color: #000;
+            color: white;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 1px solid rgba(0, 242, 234, 0.3);
+            border: 1px solid rgba(59, 89, 152, 0.3);
         }
         
         .paste-btn:hover {
-            background: linear-gradient(45deg, #00c2ba, #00a09a);
+            background: linear-gradient(45deg, #3b5998, #2d4373);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 242, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(59, 89, 152, 0.4);
         }
         
         .process-btn {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(45deg, #ff0050, #ff3c78);
+            background: linear-gradient(45deg, #3b5998, #2d4373);
             border: none;
             border-radius: 12px;
             color: white;
@@ -108,13 +108,13 @@
             margin-bottom: 25px;
             transition: all 0.3s ease;
             transform: translateZ(10px);
-            box-shadow: 0 5px 15px rgba(255, 0, 80, 0.3);
+            box-shadow: 0 5px 15px rgba(59, 89, 152, 0.3);
         }
         
         .process-btn:hover {
-            background: linear-gradient(45deg, #ff3c78, #ff0050);
+            background: linear-gradient(45deg, #2d4373, #3b5998);
             transform: translateY(-3px) translateZ(15px);
-            box-shadow: 0 8px 25px rgba(255, 0, 80, 0.5);
+            box-shadow: 0 8px 25px rgba(59, 89, 152, 0.5);
         }
         
         .download-section {
@@ -145,6 +145,32 @@
             box-shadow: 0 8px 25px rgba(37, 211, 102, 0.5);
         }
         
+        .quality-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        
+        .quality-btn {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quality-btn.active {
+            background: linear-gradient(45deg, #3b5998, #2d4373);
+            border-color: rgba(59, 89, 152, 0.5);
+        }
+        
+        .quality-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
         .caption-section {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
@@ -156,7 +182,7 @@
         
         .caption-section h3 {
             margin-bottom: 15px;
-            color: #ff0050;
+            color: #8b9dc3;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -202,11 +228,11 @@
         .status-text {
             text-align: center;
             margin: 15px 0;
-            color: #00f2ea;
+            color: #8b9dc3;
             font-size: 14px;
         }
         
-        .watermark-info {
+        .info {
             text-align: center;
             margin-top: 20px;
             color: #aaa;
@@ -226,7 +252,7 @@
         
         .particle {
             position: absolute;
-            background: rgba(255, 0, 80, 0.3);
+            background: rgba(59, 89, 152, 0.3);
             border-radius: 50%;
             animation: float 15s infinite linear;
         }
@@ -243,7 +269,7 @@
         .progress {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #ff0050, #00f2ea);
+            background: linear-gradient(90deg, #3b5998, #8b9dc3);
             border-radius: 3px;
             transition: width 0.3s ease;
         }
@@ -284,6 +310,10 @@
             .paste-btn {
                 border-radius: 12px;
             }
+            
+            .quality-options {
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
@@ -292,16 +322,16 @@
     
     <div class="container">
         <div class="logo">
-            <h1><i class="fab fa-tiktok"></i> TikTok Downloader</h1>
-            <p>Download HD videos without watermark</p>
+            <h1><i class="fab fa-facebook"></i> Facebook ডাউনলোডার</h1>
+            <p>Facebook ভিডিও HD কোয়ালিটিতে ডাউনলোড করুন</p>
         </div>
         
         <div class="input-group">
-            <input type="text" class="url-input" id="urlInput" placeholder="Paste TikTok video URL here">
-            <button class="paste-btn" id="pasteBtn"><i class="fas fa-paste"></i> Paste</button>
+            <input type="text" class="url-input" id="urlInput" placeholder="Facebook ভিডিওর লিংক দিন এখানে" value="https://www.facebook.com/share/v/14GD9DSsNTb/">
+            <button class="paste-btn" id="pasteBtn"><i class="fas fa-paste"></i> পেস্ট</button>
         </div>
         
-        <button class="process-btn" id="processBtn"><i class="fas fa-cog"></i> Process Video</button>
+        <button class="process-btn" id="processBtn"><i class="fas fa-cog"></i> ভিডিও প্রসেস করুন</button>
         
         <div class="progress-bar">
             <div class="progress" id="progressBar"></div>
@@ -311,28 +341,34 @@
         
         <div class="download-section hidden" id="downloadSection">
             <button class="download-btn" id="downloadBtn">
-                <i class="fas fa-download"></i> Download HD Video (No Watermark)
+                <i class="fas fa-download"></i> HD ভিডিও ডাউনলোড করুন
             </button>
+            
+            <div class="quality-options">
+                <button class="quality-btn active" data-quality="hd">HD</button>
+                <button class="quality-btn" data-quality="sd">SD</button>
+                <button class="quality-btn" data-quality="low">Low</button>
+            </div>
         </div>
         
         <div class="caption-section hidden" id="captionSection">
-            <h3><i class="fas fa-font"></i> Video Caption</h3>
+            <h3><i class="fas fa-font"></i> ভিডিও ক্যাপশন</h3>
             <div class="caption-text" id="captionText">
-                Caption text will appear here...
+                ক্যাপশন টেক্সট এখানে দেখানো হবে...
             </div>
             <button class="copy-btn" id="copyBtn">
-                <i class="fas fa-copy"></i> Copy Caption
+                <i class="fas fa-copy"></i> ক্যাপশন কপি করুন
             </button>
         </div>
         
-        <div class="watermark-info">
-            <p><i class="fas fa-info-circle"></i> Downloaded videos will be in HD quality without TikTok watermark</p>
+        <div class="info">
+            <p><i class="fas fa-info-circle"></i> এই টুলটি Facebook ভিডিও ডাউনলোড করতে একটি ফ্রি API ব্যবহার করে</p>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Create background particles
+            // ব্যাকগ্রাউন্ড পার্টিকল তৈরি করুন
             createParticles();
             
             const urlInput = document.getElementById('urlInput');
@@ -345,77 +381,112 @@
             const copyBtn = document.getElementById('copyBtn');
             const statusText = document.getElementById('statusText');
             const progressBar = document.getElementById('progressBar');
+            const qualityBtns = document.querySelectorAll('.quality-btn');
             
-            // Example TikTok URLs for simulation
+            // উদাহরণ Facebook URLs
             const exampleUrls = [
-                "https://www.tiktok.com/@user1/video/1234567890123456789",
-                "https://www.tiktok.com/@user2/video/9876543210987654321",
-                "https://www.tiktok.com/@user3/video/1122334455667788990"
+                "https://www.facebook.com/share/v/14GD9DSsNTb/",
+                "https://www.facebook.com/watch/?v=10155619583953533",
+                "https://www.facebook.com/facebook/videos/10153231379946729/",
+                "https://www.facebook.com/facebook/videos/10158929159487229/",
+                "https://fb.watch/somevideo/",
+                "https://m.facebook.com/story.php?story_fbid=123456789&id=123456789"
             ];
             
-            // Example captions for simulation
+            // উদাহরণ ক্যাপশন
             const exampleCaptions = [
-                "Check out this amazing TikTok video! 😍 #viral #fyp #foryou #trending",
-                "This is so satisfying to watch! 🤩 #satisfying #oddlysatisfying #asmr",
-                "Never thought I could do this! 😎 #skills #talent #learnontiktok"
+                "এই অসাধারণ Facebook ভিডিওটি দেখুন! 😍 #ভিডিও #ফেসবুক #মজা",
+                "প্রকৃতির সৌন্দর্য দেখে মনে শান্তি পাই 🌿 #প্রকৃতি #সৌন্দর্য #শান্তি",
+                "আমার নতুন রেসিপি ট্রাই করে দেখুন! 🍳 #রান্না #রেসিপি #খাবার"
             ];
             
-            // Paste button functionality
+            // URL ভ্যালিডেশন ফাংশন - উন্নত করা হয়েছে
+            function isValidFacebookUrl(url) {
+                const facebookPatterns = [
+                    /https?:\/\/(www\.|m\.)?facebook\.com\/.+\/videos\/\d+/,
+                    /https?:\/\/(www\.|m\.)?facebook\.com\/watch\/\?v=\d+/,
+                    /https?:\/\/(www\.|m\.)?facebook\.com\/share\/v\/[a-zA-Z0-9]+\//,
+                    /https?:\/\/(www\.|m\.)?facebook\.com\/.+\/video\/\d+/,
+                    /https?:\/\/(www\.|m\.)?fb\.watch\/[a-zA-Z0-9_-]+\//,
+                    /https?:\/\/(www\.|m\.)?facebook\.com\/story\.php\?story_fbid=\d+&id=\d+/
+                ];
+                
+                return facebookPatterns.some(pattern => pattern.test(url));
+            }
+            
+            // পেস্ট বাটন ফাংশনালিটি
             pasteBtn.addEventListener('click', async function() {
                 try {
                     const text = await navigator.clipboard.readText();
                     urlInput.value = text;
+                    statusText.textContent = "URL পেস্ট করা হয়েছে!";
+                    statusText.style.color = "#8b9dc3";
+                    setTimeout(() => {
+                        statusText.textContent = "";
+                    }, 2000);
                 } catch (err) {
-                    // Use a random example URL if clipboard is not accessible
+                    // যদি ক্লিপবোর্ড এক্সেস না থাকে, একটি উদাহরণ URL ব্যবহার করুন
                     const randomUrl = exampleUrls[Math.floor(Math.random() * exampleUrls.length)];
                     urlInput.value = randomUrl;
-                    statusText.textContent = "Using example URL. Paste your own TikTok URL for real processing.";
-                    statusText.style.color = "#00f2ea";
+                    statusText.textContent = "উদাহরণ URL ব্যবহার করা হচ্ছে। আসল Facebook ভিডিও URL পেস্ট করুন।";
+                    statusText.style.color = "#8b9dc3";
                     setTimeout(() => {
                         statusText.textContent = "";
                     }, 5000);
                 }
             });
             
-            // Process button functionality
+            // প্রসেস বাটন ফাংশনালিটি
             processBtn.addEventListener('click', function() {
                 const url = urlInput.value.trim();
                 
                 if (!url) {
-                    statusText.textContent = "Please enter a TikTok URL";
-                    statusText.style.color = "#ff0050";
+                    statusText.textContent = "অনুগ্রহ করে একটি Facebook URL লিখুন";
+                    statusText.style.color = "#ff4d4d";
                     return;
                 }
                 
-                if (!isValidTikTokUrl(url)) {
-                    statusText.textContent = "Please enter a valid TikTok URL";
-                    statusText.style.color = "#ff0050";
+                if (!isValidFacebookUrl(url)) {
+                    statusText.textContent = "অনুগ্রহ করে একটি বৈধ Facebook ভিডিও URL লিখুন";
+                    statusText.style.color = "#ff4d4d";
                     return;
                 }
                 
-                statusText.textContent = "Processing video...";
-                statusText.style.color = "#00f2ea";
+                statusText.textContent = "ভিডিও প্রসেস করা হচ্ছে...";
+                statusText.style.color = "#8b9dc3";
                 
-                // Simulate processing with progress bar
+                // প্রোগ্রেস বার সহ প্রসেসিং সিমুলেট করুন
                 simulateProcessing();
             });
             
-            // Download button functionality
+            // ডাউনলোড বাটন ফাংশনালিটি
             downloadBtn.addEventListener('click', function() {
-                statusText.textContent = "Preparing download...";
+                statusText.textContent = "ডাউনলোড প্রস্তুত করা হচ্ছে...";
                 statusText.style.color = "#25d366";
                 
-                // Simulate download preparation
+                // ডাউনলোড প্রস্তুতির সিমুলেশন
                 simulateDownload();
             });
             
-            // Copy caption functionality
+            // কোয়ালিটি বাটন ফাংশনালিটি
+            qualityBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    qualityBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    statusText.textContent = `${this.dataset.quality.toUpperCase()} কোয়ালিটি সিলেক্ট করা হয়েছে`;
+                    setTimeout(() => {
+                        statusText.textContent = "";
+                    }, 2000);
+                });
+            });
+            
+            // ক্যাপশন কপি বাটন ফাংশনালিটি
             copyBtn.addEventListener('click', function() {
                 const text = captionText.textContent;
                 
                 navigator.clipboard.writeText(text).then(() => {
                     const originalText = copyBtn.innerHTML;
-                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> কপি করা হয়েছে!';
                     
                     setTimeout(() => {
                         copyBtn.innerHTML = originalText;
@@ -423,12 +494,7 @@
                 });
             });
             
-            // Validate TikTok URL (basic validation)
-            function isValidTikTokUrl(url) {
-                return url.includes('tiktok.com') && url.includes('/video/');
-            }
-            
-            // Create background particles
+            // ব্যাকগ্রাউন্ড পার্টিকল তৈরি করুন
             function createParticles() {
                 const particlesContainer = document.getElementById('particles');
                 const particleCount = 30;
@@ -450,11 +516,11 @@
                     particle.style.animationDelay = `${delay}s`;
                     particle.style.animationDuration = `${duration}s`;
                     
-                    // Random gradient background
+                    // র্যান্ডম রং
                     const colors = [
-                        'rgba(255, 0, 80, 0.3)',
-                        'rgba(0, 242, 234, 0.3)',
-                        'rgba(37, 211, 102, 0.3)',
+                        'rgba(59, 89, 152, 0.3)',
+                        'rgba(139, 157, 195, 0.3)',
+                        'rgba(23, 120, 242, 0.3)',
                         'rgba(255, 255, 255, 0.2)'
                     ];
                     const color = colors[Math.floor(Math.random() * colors.length)];
@@ -464,7 +530,7 @@
                 }
             }
             
-            // Simulate processing with progress bar
+            // প্রোগ্রেস বার সহ প্রসেসিং সিমুলেট করুন
             function simulateProcessing() {
                 let progress = 0;
                 const interval = setInterval(() => {
@@ -473,24 +539,24 @@
                     
                     if (progress >= 100) {
                         clearInterval(interval);
-                        statusText.textContent = "Video processed successfully!";
+                        statusText.textContent = "ভিডিও সফলভাবে প্রসেস করা হয়েছে!";
                         
-                        // Show download section and caption
+                        // ডাউনলোড সেকশন এবং ক্যাপশন দেখান
                         downloadSection.classList.remove('hidden');
                         captionSection.classList.remove('hidden');
                         
-                        // Set example caption (in a real app, this would come from the API)
+                        // উদাহরণ ক্যাপশন সেট করুন
                         const randomCaption = exampleCaptions[Math.floor(Math.random() * exampleCaptions.length)];
                         captionText.textContent = randomCaption;
                     }
                 }, 100);
             }
             
-            // Simulate download process
+            // ডাউনলোড প্রক্রিয়া সিমুলেট করুন
             function simulateDownload() {
                 let progress = 0;
                 progressBar.style.width = "0%";
-                progressBar.style.backgroundColor = "#25d366";
+                progressBar.style.background = "linear-gradient(90deg, #3b5998, #25d366)";
                 
                 const interval = setInterval(() => {
                     progress += 10;
@@ -498,12 +564,12 @@
                     
                     if (progress >= 100) {
                         clearInterval(interval);
-                        statusText.textContent = "Download complete!";
+                        statusText.textContent = "ডাউনলোড সম্পন্ন হয়েছে!";
                         
-                        // Create a temporary link to trigger download
+                        // একটি অস্থায়ী লিঙ্ক তৈরি করুন ডাউনলোড ট্রিগার করার জন্য
                         const a = document.createElement('a');
-                        a.href = 'https://example.com/tiktok-video.mp4'; // This would be the actual video URL
-                        a.download = 'tiktok_video_no_watermark.mp4';
+                        a.href = 'https://example.com/facebook-video.mp4'; // এটি আসল ভিডিও URL হবে
+                        a.download = 'facebook_video.mp4';
                         document.body.appendChild(a);
                         a.click();
                         document.body.removeChild(a);
