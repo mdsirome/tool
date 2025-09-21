@@ -3,398 +3,1694 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Sports Stream</title>
+    <title>Advanced Image Editor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #0c2461 0%, #1e3799 50%, #0c2461 100%);
-            color: #fff;
-            padding: 15px;
-            min-height: 100vh;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
         }
         
         .container {
-            max-width: 500px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 10px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
         
-        .header {
+        header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 20px;
             text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
         
         h1 {
-            font-size: 26px;
-            margin-bottom: 5px;
-            color: #ffc107;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 28px;
+            margin-bottom: 10px;
         }
         
-        .subtitle {
-            font-size: 16px;
-            opacity: 0.9;
-            color: #ddd;
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
         }
         
-        .player-selector {
+        .canvas-section {
+            flex: 2;
+            min-width: 300px;
+        }
+        
+        .tools-section {
+            flex: 1;
+            min-width: 250px;
+            background: #f9fafc;
+            padding: 20px;
+            border-radius: 8px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        
+        .canvas-container {
+            position: relative;
+            margin-bottom: 20px;
+            border: 5px solid #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            height: 400px;
             display: flex;
             justify-content: center;
-            margin: 20px 0;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 12px;
-            border-radius: 12px;
-        }
-        
-        select {
-            padding: 12px 20px;
-            border-radius: 30px;
-            border: 2px solid #3498db;
-            background: #1e3799;
-            color: white;
-            font-size: 16px;
-            width: 100%;
-            max-width: 300px;
-            outline: none;
+            align-items: center;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         
-        .match-buttons {
+        #canvas {
+            display: block;
+            background: white;
+            max-width: 100%;
+            max-height: 100%;
+            cursor: move;
+        }
+        
+        .drop-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .circle-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .circle-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .drop-text {
+            color: #666;
+            font-weight: 500;
+            max-width: 200px;
+            line-height: 1.4;
+        }
+        
+        .upload-options {
             display: flex;
             flex-direction: column;
             gap: 15px;
             margin-bottom: 20px;
-        }
-        
-        .match-button {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
             padding: 15px;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.3s, background 0.3s;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
         
-        .match-button:hover {
-            transform: translateY(-3px);
-            background: rgba(255, 255, 255, 0.12);
-        }
-        
-        .tournament-info {
+        .url-input {
             display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 10px;
         }
         
-        .tournament-logo {
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #ffc107, #ff9800);
-            border-radius: 50%;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        input[type="text"], input[type="color"], input[type="file"], input[type="number"], input[type="range"], select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
         }
         
-        .tournament-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #ffc107;
-        }
-        
-        .teams-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .team {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 40%;
-        }
-        
-        .team-flag {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #2c3e50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 8px;
-            font-size: 28px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            border: 2px solid rgba(255,255,255,0.1);
-        }
-        
-        .team-name {
-            font-size: 15px;
-            text-align: center;
-            font-weight: 600;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-        
-        .vs {
-            font-size: 14px;
-            opacity: 0.8;
-            font-weight: bold;
-            padding: 0 10px;
-            color: #ddd;
-        }
-        
-        .live-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #e74c3c;
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            background: #4a6cf7;
             color: white;
-            padding: 5px 12px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: bold;
-            animation: pulse 1.5s infinite;
-            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
-        
-        .navigation {
-            display: flex;
-            justify-content: space-around;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 15px;
-            margin-top: 20px;
-        }
-        
-        .nav-item {
-            padding: 12px 20px;
-            border-radius: 30px;
             cursor: pointer;
-            transition: background 0.3s;
-            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        button:hover {
+            background: #3b5be3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-danger {
+            background: #f83c3c;
+        }
+        
+        .btn-danger:hover {
+            background: #e62a2a;
+        }
+        
+        .btn-success {
+            background: #2ecc71;
+        }
+        
+        .btn-success:hover {
+            background: #27ae60;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .tool-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tool-section h3 {
+            margin-bottom: 10px;
+            color: #4a6cf7;
+            font-size: 18px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
         
-        .nav-item.active {
-            background: #ffc107;
-            color: #0c2461;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+        .toggle-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
         }
         
-        .footer {
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #4a6cf7;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .size-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .size-btn {
+            font-size: 12px;
+            padding: 8px 5px;
+        }
+        
+        .format-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .canvas-size-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .canvas-size-inputs input {
             text-align: center;
-            margin-top: 25px;
-            opacity: 0.7;
-            font-size: 14px;
-            color: #aaa;
         }
         
-        /* Responsive adjustments */
-        @media (max-width: 500px) {
-            .team-flag {
-                width: 50px;
-                height: 50px;
-                font-size: 24px;
+        .image-size-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .image-size-inputs input {
+            text-align: center;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #f1f5fd;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #4a6cf7;
+        }
+        
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .color-box:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-box.selected {
+            border: 2px solid #333;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        
+        .custom-color {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .text-controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .font-selector {
+            margin-bottom: 10px;
+        }
+        
+        .choose-file {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .logo-controls {
+            margin-top: 10px;
+        }
+        
+        .social-sizes {
+            display: none;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .social-btn {
+            font-size: 12px;
+            padding: 8px 5px;
+            text-align: center;
+        }
+        
+        .presets-toggle {
+            margin-top: 10px;
+            cursor: pointer;
+            color: #4a6cf7;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .text-color-palette {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .active {
+            background-color: #3b5be3 !important;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
             }
             
-            .team-name {
-                font-size: 13px;
+            .size-buttons, .social-sizes {
+                grid-template-columns: repeat(2, 1fr);
             }
             
-            .tournament-name {
+            .canvas-container {
+                height: 300px;
+            }
+            
+            .color-palette {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .text-controls {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .circle-button {
+                width: 100px;
+                height: 100px;
+                font-size: 36px;
+            }
+            
+            .drop-text {
                 font-size: 14px;
+                max-width: 160px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Match</h1>
-            <p class="subtitle">Every Match 1 Click Button</p>
-        </div>
+        <header>
+            <h1><i class="fas fa-image"></i> Advanced Image Editor</h1>
+            <p>Upload, edit and share your images with multiple features</p>
+        </header>
         
-        <div class="player-selector">
-            <select id="playerSelector">
-                <option value="mx">🎬 MX Player</option>
-                <option value="ns">📺 Network Stream Player</option>
-                <option value="mp">📽 Mini Player</option>
-            </select>
-        </div>
-        
-        <div class="match-buttons">
-            <!-- Cricket Match -->
-            <div class="match-button" onclick="openStream('https://dish.slivcdn.com/hls/live/2011739-b/TEN1SD/master.m3u8')">
-                <div class="tournament-info">
-                    <div class="tournament-logo">C</div>
-                    <div class="tournament-name">Cricket II Asia Cup</div>
-                </div>
-                <div class="teams-container">
-                    <div class="team">
-                        <div class="team-flag">🇱🇰</div>
-                        <div class="team-name">Sri Lanka</div>
-                    </div>
-                    <div class="vs">VS</div>
-                    <div class="team">
-                        <div class="team-flag">🇧🇩</div>
-                        <div class="team-name">Bangladesh</div>
+        <div class="main-content">
+            <div class="canvas-section">
+                <div class="canvas-container" id="canvasContainer">
+                    <canvas id="canvas" width="800" height="600"></canvas>
+                    <div class="drop-area" id="dropArea">
+                        <div class="circle-button" id="circleButton">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="drop-text" id="dropText">Select image (Click or Drag & Drop)</div>
                     </div>
                 </div>
-                <div class="live-badge">LIVE</div>
-            </div>
-            
-            <!-- Football Matches -->
-            <div class="match-button" onclick="openStream('https://dish.slivcdn.com/hls/live/2020592-b/TEN3SD/master.m3u8')">
-                <div class="tournament-info">
-                    <div class="tournament-logo">F</div>
-                    <div class="tournament-name">Football II Saudi Pro League</div>
+                
+                <div class="choose-file">
+                    <h3><i class="fas fa-folder-open"></i> Choose File</h3>
+                    <input type="file" id="imageUpload" accept="image/*" multiple>
+                    <p style="margin-top: 10px; color: #666; font-size: 14px;">You can select multiple images to add to canvas</p>
                 </div>
-                <div class="teams-container">
-                    <div class="team">
-                        <div class="team-flag">⚽</div>
-                        <div class="team-name">Al-Hazem</div>
+                
+                <div class="upload-options">
+                    <div class="url-input">
+                        <input type="text" id="imageUrl" placeholder="Enter image URL">
+                        <button id="btnLoad"><i class="fas fa-download"></i> Load</button>
                     </div>
-                    <div class="vs">VS</div>
-                    <div class="team">
-                        <div class="team-flag">⚽</div>
-                        <div class="team-name">Al-Fateh</div>
+                    
+                    <div class="btn-group">
+                        <button id="btnPaste"><i class="fas fa-paste"></i> Paste</button>
+                        <button id="btnClear" class="btn-danger"><i class="fas fa-trash"></i> Clear</button>
                     </div>
+                    
+                    <input type="file" id="bgImageUpload" accept="image/*" style="display: none;">
                 </div>
-                <div class="live-badge">LIVE</div>
-            </div>
-            
-            <div class="match-button" onclick="openStream('https://dish.slivcdn.com/hls/live/2020594-b/SONYSIXSD/master.m3u8')">
-                <div class="tournament-info">
-                    <div class="tournament-logo">F</div>
-                    <div class="tournament-name">Football II Premier League</div>
-                </div>
-                <div class="teams-container">
-                    <div class="team">
-                        <div class="team-flag">🔴</div>
-                        <div class="team-name">Manchester United</div>
-                    </div>
-                    <div class="vs">VS</div>
-                    <div class="team">
-                        <div class="team-flag">🔵</div>
-                        <div class="team-name">Chelsea</div>
-                    </div>
-                </div>
-                <div class="live-badge">LIVE</div>
-            </div>
-            
-            <div class="match-button">
-                <div class="tournament-info">
-                    <div class="tournament-logo">F</div>
-                    <div class="tournament-name">Football II Serie A</div>
-                </div>
-                <div class="teams-container">
-                    <div class="team">
-                        <div class="team-flag">🔶</div>
-                        <div class="team-name">Hellas Verona</div>
-                    </div>
-                    <div class="vs">VS</div>
-                    <div class="team">
-                        <div class="team-flag">⚫</div>
-                        <div class="team-name">Juventus</div>
-                    </div>
+                
+                <div class="loading" id="loadingIndicator">
+                    <i class="fas fa-spinner fa-spin"></i> Removing background... Please wait.
                 </div>
             </div>
             
-            <div class="match-button">
-                <div class="tournament-info">
-                    <div class="tournament-logo">F</div>
-                    <div class="tournament-name">Football II Bundesliga</div>
+            <div class="tools-section">
+                <div class="tool-section">
+                    <h3><i class="fas fa-paint-brush"></i> Canvas Settings</h3>
+                    
+                    <div class="canvas-size-inputs">
+                        <input type="number" id="canvasWidth" placeholder="Width (px)" value="800">
+                        <input type="number" id="canvasHeight" placeholder="Height (px)" value="600">
+                    </div>
+                    <button id="btnResizeCanvas" style="margin-bottom: 10px;"><i class="fas fa-expand"></i> Resize Canvas</button>
+                    
+                    <div class="toggle-wrap">
+                        <label for="lockAspect">Lock Aspect Ratio</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="lockAspect">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="presets-toggle" id="presetsToggle">
+                        <i class="fas fa-chevron-down"></i> Image Size Presets
+                    </div>
+                    
+                    <div class="social-sizes" id="socialSizes">
+                        <button class="social-btn" data-size="1024x1024">Square (1024×1024)</button>
+                        <button class="social-btn" data-size="1080x1080">Instagram Post (1080×1080)</button>
+                        <button class="social-btn" data-size="400x400">Facebook Profile (400×400)</button>
+                        <button class="social-btn" data-size="820x312">Facebook Cover (820×312)</button>
+                        <button class="social-btn" data-size="1500x500">Twitter Header (1500×500)</button>
+                        <button class="social-btn" data-size="1280x720">Youtube Thumbnail (1280×720)</button>
+                        <button class="social-btn" data-size="2560x1440">Youtube Banner (2560×1440)</button>
+                        <button class="social-btn" data-size="1200x630">Facebook Share (1200×630)</button>
+                    </div>
                 </div>
-                <div class="teams-container">
-                    <div class="team">
-                        <div class="team-flag">🔴</div>
-                        <div class="team-name">RB Leipzig</div>
+                
+                <div class="tool-section">
+                    <h3><i class="fas fa-image"></i> Image Settings</h3>
+                    
+                    <div class="image-size-inputs">
+                        <input type="number" id="imageWidth" placeholder="Width (px)" disabled>
+                        <input type="number" id="imageHeight" placeholder="Height (px)" disabled>
                     </div>
-                    <div class="vs">VS</div>
-                    <div class="team">
-                        <div class="team-flag">⚪</div>
-                        <div class="team-name">1. FC Köln</div>
+                    
+                    <div class="image-size-inputs">
+                        <input type="number" id="resizeWidth" placeholder="New Width">
+                        <input type="number" id="resizeHeight" placeholder="New Height">
                     </div>
+                    <button id="btnResizeImage" style="margin-bottom: 10px;"><i class="fas fa-expand-arrows-alt"></i> Resize Image</button>
+                    
+                    <div class="toggle-wrap">
+                        <label for="lockImageAspect">Lock Aspect Ratio</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="lockImageAspect" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="imageBrightness">Brightness:</label>
+                        <input type="range" id="imageBrightness" min="0" max="200" value="100">
+                        <span class="slider-value" id="brightnessValue">100%</span>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="imageContrast">Contrast:</label>
+                        <input type="range" id="imageContrast" min="0" max="200" value="100">
+                        <span class="slider-value" id="contrastValue">100%</span>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="imageSaturation">Saturation:</label>
+                        <input type="range" id="imageSaturation" min="0" max="200" value="100">
+                        <span class="slider-value" id="saturationValue">100%</span>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="imageRotation">Rotation:</label>
+                        <input type="range" id="imageRotation" min="0" max="360" value="0">
+                        <span class="slider-value" id="rotationValue">0°</span>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button id="btnFlipH"><i class="fas fa-arrows-alt-h"></i> Flip H</button>
+                        <button id="btnFlipV"><i class="fas fa-arrows-alt-v"></i> Flip V</button>
+                        <button id="btnResetFilters"><i class="fas fa-redo"></i> Reset</button>
+                    </div>
+                </div>
+                
+                <div class="tool-section">
+                    <h3><i class="fas fa-layer-group"></i> Image Position</h3>
+                    <div class="btn-group">
+                        <button id="btnFill"><i class="fas fa-fill"></i> Fill</button>
+                        <button id="btnFit"><i class="fas fa-compress"></i> Fit</button>
+                        <button id="btnCenter"><i class="fas fa-align-center"></i> Center</button>
+                    </div>
+                </div>
+                
+                <div class="tool-section">
+                    <h3><i class="fas fa-palette"></i> Background</h3>
+                    
+                    <h4 style="margin: 10px 0 5px 0;">Color Palette</h4>
+                    <div class="color-palette">
+                        <div class="color-box selected" style="background-color: #ffffff;" data-color="#ffffff" title="White"></div>
+                        <div class="color-box" style="background-color: #000000;" data-color="#000000" title="Black"></div>
+                        <div class="color-box" style="background-color: #ff0000;" data-color="#ff0000" title="Red"></div>
+                        <div class="color-box" style="background-color: #00ff00;" data-color="#00ff00" title="Green"></div>
+                        <div class="color-box" style="background-color: #0000ff;" data-color="#0000ff" title="Blue"></div>
+                        <div class="color-box" style="background-color: #ffff00;" data-color="#ffff00" title="Yellow"></div>
+                        <div class="color-box" style="background-color: #ff00ff;" data-color="#ff00ff" title="Magenta"></div>
+                        <div class="color-box" style="background-color: #00ffff;" data-color="#00ffff" title="Cyan"></div>
+                        <div class="color-box" style="background-color: #ffa500;" data-color="#ffa500" title="Orange"></div>
+                        <div class="color-box" style="background-color: #800080;" data-color="#800080" title="Purple"></div>
+                    </div>
+                    
+                    <div class="custom-color">
+                        <input type="color" id="bgColorPicker" value="#ffffff">
+                        <span>Custom Color</span>
+                    </div>
+                    
+                    <div class="btn-group" style="margin-top: 10px;">
+                        <button id="btnTransparent"><i class="fas fa-eye-slash"></i> Transparent</button>
+                        <button id="btnUploadBg"><i class="fas fa-upload"></i> BG Image</button>
+                    </div>
+                </div>
+                
+                <div class="tool-section">
+                    <h3><i class="fas fa-font"></i> Text Editor</h3>
+                    
+                    <input type="text" id="textInput" placeholder="Enter text here" style="margin-bottom: 10px;">
+                    
+                    <div class="text-controls">
+                        <button id="btnAddText"><i class="fas fa-plus"></i> Add Text</button>
+                        <button id="btnBold"><i class="fas fa-bold"></i> B</button>
+                        <button id="btnItalic"><i class="fas fa-italic"></i> I</button>
+                        <button id="btnUnderline"><i class="fas fa-underline"></i> U</button>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="textSize">Text Size:</label>
+                        <input type="range" id="textSize" min="10" max="72" value="24">
+                        <span class="slider-value" id="textSizeValue">24px</span>
+                    </div>
+                    
+                    <div class="font-selector">
+                        <select id="fontFamily">
+                            <!-- English Fonts -->
+                            <option value="Arial">Arial (English)</option>
+                            <option value="Helvetica">Helvetica (English)</option>
+                            <option value="Times New Roman">Times New Roman (English)</option>
+                            <option value="Courier New">Courier New (English)</option>
+                            <option value="Verdana">Verdana (English)</option>
+                            <option value="Georgia">Georgia (English)</option>
+                            <option value="Palatino">Palatino (English)</option>
+                            <option value="Garamond">Garamond (English)</option>
+                            <option value="Comic Sans MS">Comic Sans MS (English)</option>
+                            <option value="Impact">Impact (English)</option>
+                            <option value="Lucida Console">Lucida Console (English)</option>
+                            <option value="Tahoma">Tahoma (English)</option>
+                            <option value="Trebuchet MS">Trebuchet MS (English)</option>
+                            <option value="Brush Script MT">Brush Script MT (English)</option>
+                            <option value="Arial Black">Arial Black (English)</option>
+                            
+                            <!-- Bengali Fonts -->
+                            <option value="SolaimanLipi">SolaimanLipi (Bengali)</option>
+                            <option value="Kalpurush">Kalpurush (Bengali)</option>
+                            <option value="Siyam Rupali">Siyam Rupali (Bengali)</option>
+                            <option value="Bangla">Bangla (Bengali)</option>
+                            <option value="Lipika">Lipika (Bengali)</option>
+                            <option value="AdorshoLipi">AdorshoLipi (Bengali)</option>
+                            <option value="Ekushey Punarbhaba">Ekushey Punarbhaba (Bengali)</option>
+                            <option value="Bangla MN">Bangla MN (Bengali)</option>
+                            <option value="Bangla Sangam MN">Bangla Sangam MN (Bengali)</option>
+                            <option value="Mukti">Mukti (Bengali)</option>
+                            <option value="Mukti Narrow">Mukti Narrow (Bengali)</option>
+                            <option value="Akaash">Akaash (Bengali)</option>
+                            <option value="Mitra Mono">Mitra Mono (Bengali)</option>
+                            <option value="Nirmala UI">Nirmala UI (Bengali)</option>
+                            <option value="Vrinda">Vrinda (Bengali)</option>
+                            
+                            <!-- Arabic Fonts -->
+                            <option value="Arial">Arial (Arabic)</option>
+                            <option value="Times New Roman">Times New Roman (Arabic)</option>
+                            <option value="Traditional Arabic">Traditional Arabic (Arabic)</option>
+                            <option value="Simplified Arabic">Simplified Arabic (Arabic)</option>
+                            <option value="Arabic Typesetting">Arabic Typesetting (Arabic)</option>
+                            <option value="Microsoft Sans Serif">Microsoft Sans Serif (Arabic)</option>
+                            <option value="Segoe UI">Segoe UI (Arabic)</option>
+                            <option value="Tahoma">Tahoma (Arabic)</option>
+                            <option value="Dubai">Dubai (Arabic)</option>
+                            <option value="Geeza Pro">Geeza Pro (Arabic)</option>
+                        </select>
+                    </div>
+                    
+                    <h4 style="margin: 10px 0 5px 0;">Text Color</h4>
+                    <div class="text-color-palette">
+                        <div class="color-box selected" style="background-color: #000000;" data-color="#000000" title="Black"></div>
+                        <div class="color-box" style="background-color: #ffffff; border: 1px solid #ccc;" data-color="#ffffff" title="White"></div>
+                        <div class="color-box" style="background-color: #ff0000;" data-color="#ff0000" title="Red"></div>
+                        <div class="color-box" style="background-color: #0000ff;" data-color="#0000ff" title="Blue"></div>
+                        <div class="color-box" style="background-color: #008000;" data-color="#008000" title="Green"></div>
+                        <div class="color-box" style="background-color: #ffff00;" data-color="#ffff00" title="Yellow"></div>
+                        <div class="color-box" style="background-color: #ffa500;" data-color="#ffa500" title="Orange"></div>
+                        <div class="color-box" style="background-color: #800080;" data-color="#800080" title="Purple"></div>
+                        <div class="color-box" style="background-color: #ffc0cb;" data-color="#ffc0cb" title="Pink"></div>
+                        <div class="color-box" style="background-color: #a52a2a;" data-color="#a52a2a" title="Brown"></div>
+                    </div>
+                    
+                    <input type="color" id="textColorPicker" value="#000000" style="margin-top: 10px;">
+                </div>
+                
+                <div class="tool-section">
+                    <h3><i class="fas fa-copyright"></i> Logo Overlay</h3>
+                    
+                    <div class="btn-group">
+                        <button id="btnAddLogo"><i class="fas fa-plus-circle"></i> Add Logo</button>
+                        <button id="btnToFront"><i class="fas fa-arrow-up"></i> To Front</button>
+                        <button id="btnToBack"><i class="fas fa-arrow-down"></i> To Back</button>
+                    </div>
+                    
+                    <input type="file" id="logoUpload" accept="image/*" style="display: none;">
+                </div>
+                
+                <div class="tool-section">
+                    <h3><i class="fas fa-magic"></i> Advanced Tools</h3>
+                    <button id="btnRemoveBg" class="btn-danger"><i class="fas fa-eraser"></i> Remove Background</button>
+                </div>
+                
+                <div class="tool-section">
+                    <h3><i class="fas fa-save"></i> Save & Share</h3>
+                    <div class="btn-group">
+                        <button id="btnDownload" class="btn-success"><i class="fas fa-download"></i> Download</button>
+                        <button id="btnUpload"><i class="fas fa-share"></i> Upload</button>
+                    </div>
+                    <input type="text" id="directLink" readonly style="margin-top: 10px; display: none;">
                 </div>
             </div>
         </div>
         
-        <div class="navigation">
-            <div class="nav-item active"><i class="fas fa-home"></i> Home</div>
-            <div class="nav-item"><i class="fas fa-layer-group"></i> Categories</div>
-            <div class="nav-item"><i class="fas fa-play-circle"></i> Highlights</div>
-        </div>
-        
-        <div class="footer">
-            <p>Select your preferred player and click on a match to stream</p>
-        </div>
+        <footer>
+            <p>© 2023 Advanced Image Editor | All rights reserved</p>
+        </footer>
     </div>
 
     <script>
-        function openStream(streamUrl) {
-            const playerSelector = document.getElementById('playerSelector');
-            const selectedPlayer = playerSelector.value;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Canvas setup
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const canvasContainer = document.getElementById('canvasContainer');
+            const dropArea = document.getElementById('dropArea');
+            const dropText = document.getElementById('dropText');
+            const circleButton = document.getElementById('circleButton');
+            const imageUpload = document.getElementById('imageUpload');
+            const bgColorPicker = document.getElementById('bgColorPicker');
+            const bgImageUpload = document.getElementById('bgImageUpload');
+            const btnLoad = document.getElementById('btnLoad');
+            const imageUrl = document.getElementById('imageUrl');
+            const btnClear = document.getElementById('btnClear');
+            const btnCenter = document.getElementById('btnCenter');
+            const btnFill = document.getElementById('btnFill');
+            const btnFit = document.getElementById('btnFit');
+            const btnTransparent = document.getElementById('btnTransparent');
+            const btnRemoveBg = document.getElementById('btnRemoveBg');
+            const btnDownload = document.getElementById('btnDownload');
+            const btnUpload = document.getElementById('btnUpload');
+            const btnUploadBg = document.getElementById('btnUploadBg');
+            const directLink = document.getElementById('directLink');
+            const sizeButtons = document.querySelectorAll('.size-btn');
+            const socialButtons = document.querySelectorAll('.social-btn');
+            const presetsToggle = document.getElementById('presetsToggle');
+            const socialSizes = document.getElementById('socialSizes');
+            const formatButtons = document.querySelectorAll('[data-format]');
+            const lockAspect = document.getElementById('lockAspect');
+            const btnPaste = document.getElementById('btnPaste');
+            const canvasWidth = document.getElementById('canvasWidth');
+            const canvasHeight = document.getElementById('canvasHeight');
+            const btnResizeCanvas = document.getElementById('btnResizeCanvas');
+            const loadingIndicator = document.getElementById('loadingIndicator');
             
-            let packageName = '';
-            let appName = '';
+            // Image settings elements
+            const imageWidth = document.getElementById('imageWidth');
+            const imageHeight = document.getElementById('imageHeight');
+            const resizeWidth = document.getElementById('resizeWidth');
+            const resizeHeight = document.getElementById('resizeHeight');
+            const btnResizeImage = document.getElementById('btnResizeImage');
+            const lockImageAspect = document.getElementById('lockImageAspect');
+            const imageBrightness = document.getElementById('imageBrightness');
+            const imageContrast = document.getElementById('imageContrast');
+            const imageSaturation = document.getElementById('imageSaturation');
+            const imageRotation = document.getElementById('imageRotation');
+            const brightnessValue = document.getElementById('brightnessValue');
+            const contrastValue = document.getElementById('contrastValue');
+            const saturationValue = document.getElementById('saturationValue');
+            const rotationValue = document.getElementById('rotationValue');
+            const btnFlipH = document.getElementById('btnFlipH');
+            const btnFlipV = document.getElementById('btnFlipV');
+            const btnResetFilters = document.getElementById('btnResetFilters');
             
-            switch(selectedPlayer) {
-                case 'mx':
-                    packageName = 'com.mxtech.videoplayer.ad';
-                    appName = 'MX Player';
-                    break;
-                case 'ns':
-                    packageName = 'com.genuine.leone';
-                    appName = 'Network Stream Player';
-                    break;
-                case 'mp':
-                    packageName = 'com.urdutech.miniplayer';
-                    appName = 'Mini Player';
-                    break;
+            // Text editor elements
+            const textInput = document.getElementById('textInput');
+            const btnAddText = document.getElementById('btnAddText');
+            const btnBold = document.getElementById('btnBold');
+            const btnItalic = document.getElementById('btnItalic');
+            const btnUnderline = document.getElementById('btnUnderline');
+            const textSize = document.getElementById('textSize');
+            const textSizeValue = document.getElementById('textSizeValue');
+            const fontFamily = document.getElementById('fontFamily');
+            const textColorPicker = document.getElementById('textColorPicker');
+            const textColorBoxes = document.querySelectorAll('.text-color-palette .color-box');
+            
+            // Logo overlay elements
+            const btnAddLogo = document.getElementById('btnAddLogo');
+            const logoUpload = document.getElementById('logoUpload');
+            const btnToFront = document.getElementById('btnToFront');
+            const btnToBack = document.getElementById('btnToBack');
+            
+            // Color palette elements
+            const colorBoxes = document.querySelectorAll('.color-box');
+            
+            let currentImage = null;
+            let originalImage = null;
+            let bgImage = null;
+            let logoImage = null;
+            let offsetX = 0, offsetY = 0;
+            let logoOffsetX = 0, logoOffsetY = 0;
+            let textOffsetX = 0, textOffsetY = 0;
+            let scale = 1;
+            let logoScale = 0.2;
+            let startX, startY;
+            let isDragging = false;
+            let isDraggingLogo = false;
+            let isDraggingText = false;
+            let currentFormat = 'png';
+            let lastTouchDistance = null;
+            
+            // Text properties
+            let textProperties = {
+                bold: false,
+                italic: false,
+                underline: false,
+                size: 24,
+                font: 'Arial',
+                color: '#000000',
+                text: '',
+                x: 0,
+                y: 0
+            };
+            
+            // Layers
+            let layers = {
+                background: 0,
+                image: 1,
+                logo: 2,
+                text: 3
+            };
+            
+            let activeLayer = layers.image;
+            
+            // Image filter values
+            let filters = {
+                brightness: 100,
+                contrast: 100,
+                saturation: 100,
+                rotation: 0,
+                flipH: 1,
+                flipV: 1
+            };
+            
+            // Set default background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Toggle presets menu
+            presetsToggle.addEventListener('click', function() {
+                if (socialSizes.style.display === 'grid') {
+                    socialSizes.style.display = 'none';
+                    this.innerHTML = '<i class="fas fa-chevron-down"></i> Image Size Presets';
+                } else {
+                    socialSizes.style.display = 'grid';
+                    this.innerHTML = '<i class="fas fa-chevron-up"></i> Image Size Presets';
+                }
+            });
+            
+            // Function: Load image
+            function loadImage(src) {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = function() {
+                    currentImage = img;
+                    originalImage = img;
+                    dropArea.style.display = 'none';
+                    
+                    // Update image size inputs
+                    imageWidth.value = img.width;
+                    imageHeight.value = img.height;
+                    resizeWidth.value = img.width;
+                    resizeHeight.value = img.height;
+                    
+                    fitImage();
+                    drawCanvas();
+                };
+                img.onerror = function() {
+                    alert('Could not load the image. Please provide a valid URL.');
+                };
+                img.src = src;
             }
             
-            // Try to open the stream in the selected player app
-            const intentUrl = `intent://${streamUrl}#Intent;package=${packageName};scheme=http;type=video/*;end;`;
+            // Function: Apply filters to image
+            function applyFilters() {
+                const filterString = 
+                    `brightness(${filters.brightness}%) 
+                     contrast(${filters.contrast}%) 
+                     saturate(${filters.saturation}%)`;
+                
+                return filterString;
+            }
             
-            // Try to open the app with intent
-            window.location.href = intentUrl;
+            // Function: Draw canvas
+            function drawCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw background
+                if (bgImage) {
+                    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+                } else if (ctx.fillStyle !== 'transparent') {
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                
+                // Draw image if exists
+                if (currentImage) {
+                    const scaledWidth = currentImage.width * scale;
+                    const scaledHeight = currentImage.height * scale;
+                    
+                    // Save context
+                    ctx.save();
+                    
+                    // Move to center of image
+                    ctx.translate(offsetX + scaledWidth / 2, offsetY + scaledHeight / 2);
+                    
+                    // Apply rotation
+                    ctx.rotate(filters.rotation * Math.PI / 180);
+                    
+                    // Apply flip
+                    ctx.scale(filters.flipH, filters.flipV);
+                    
+                    // Apply filters
+                    ctx.filter = applyFilters();
+                    
+                    // Draw image centered
+                    ctx.drawImage(currentImage, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+                    
+                    // Restore context
+                    ctx.restore();
+                }
+                
+                // Draw logo if exists
+                if (logoImage) {
+                    const scaledLogoWidth = logoImage.width * logoScale;
+                    const scaledLogoHeight = logoImage.height * logoScale;
+                    
+                    ctx.drawImage(logoImage, logoOffsetX, logoOffsetY, scaledLogoWidth, scaledLogoHeight);
+                }
+                
+                // Draw text if exists
+                if (textProperties.text) {
+                    ctx.font = `${textProperties.bold ? 'bold ' : ''}${textProperties.italic ? 'italic ' : ''}${textProperties.size}px ${textProperties.font}`;
+                    ctx.fillStyle = textProperties.color;
+                    ctx.fillText(textProperties.text, textProperties.x, textProperties.y);
+                    
+                    if (textProperties.underline) {
+                        ctx.beginPath();
+                        ctx.moveTo(textProperties.x, textProperties.y + 5);
+                        ctx.lineTo(textProperties.x + ctx.measureText(textProperties.text).width, textProperties.y + 5);
+                        ctx.strokeStyle = textProperties.color;
+                        ctx.stroke();
+                    }
+                }
+            }
             
-            // Fallback: if app is not installed, open in browser
-            setTimeout(function() {
-                window.location.href = streamUrl;
-            }, 500);
-        }
+            // Function: Fit image to canvas
+            function fitImage() {
+                if (!currentImage) return;
+                
+                const imgRatio = currentImage.width / currentImage.height;
+                const canvasRatio = canvas.width / canvas.height;
+                
+                if (imgRatio > canvasRatio) {
+                    // Image is wider than canvas
+                    scale = canvas.width / currentImage.width;
+                } else {
+                    // Image is taller than canvas
+                    scale = canvas.height / currentImage.height;
+                }
+                
+                centerImage();
+            }
+            
+            // Function: Fill canvas with image
+            function fillImage() {
+                if (!currentImage) return;
+                
+                const imgRatio = currentImage.width / currentImage.height;
+                const canvasRatio = canvas.width / canvas.height;
+                
+                if (imgRatio > canvasRatio) {
+                    // Image is wider than canvas
+                    scale = canvas.height / currentImage.height;
+                } else {
+                    // Image is taller than canvas
+                    scale = canvas.width / currentImage.width;
+                }
+                
+                centerImage();
+            }
+            
+            // Function: Center image
+            function centerImage() {
+                if (!currentImage) return;
+                
+                const scaledWidth = currentImage.width * scale;
+                const scaledHeight = currentImage.height * scale;
+                
+                offsetX = (canvas.width - scaledWidth) / 2;
+                offsetY = (canvas.height - scaledHeight) / 2;
+                
+                drawCanvas();
+            }
+            
+            // Function: Resize image
+            function resizeImage(newWidth, newHeight) {
+                if (!currentImage) return;
+                
+                // Create a temporary canvas to resize the image
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = newWidth;
+                tempCanvas.height = newHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Draw the image on the temporary canvas with the new size
+                tempCtx.drawImage(currentImage, 0, 0, newWidth, newHeight);
+                
+                // Create a new image from the temporary canvas
+                const resizedImage = new Image();
+                resizedImage.onload = function() {
+                    currentImage = resizedImage;
+                    imageWidth.value = newWidth;
+                    imageHeight.value = newHeight;
+                    fitImage();
+                };
+                resizedImage.src = tempCanvas.toDataURL('image/png');
+            }
+            
+            // Event: Circle button click
+            circleButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                imageUpload.click();
+            });
+            
+            // Event: File upload
+            imageUpload.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        loadImage(event.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Event: Canvas click to upload
+            canvasContainer.addEventListener('click', function(e) {
+                if (!currentImage && e.target.id !== 'canvas') {
+                    imageUpload.click();
+                }
+            });
+            
+            // Event: Drag and drop
+            canvasContainer.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                canvasContainer.style.background = '#e0e7ff';
+                dropArea.style.opacity = '0.8';
+            });
+            
+            canvasContainer.addEventListener('dragleave', function() {
+                canvasContainer.style.background = '';
+                dropArea.style.opacity = '1';
+            });
+            
+            canvasContainer.addEventListener('drop', function(e) {
+                e.preventDefault();
+                canvasContainer.style.background = '';
+                dropArea.style.opacity = '1';
+                
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        loadImage(event.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Event: Load image from URL
+            btnLoad.addEventListener('click', function() {
+                if (imageUrl.value) {
+                    loadImage(imageUrl.value);
+                } else {
+                    alert('Please enter a valid URL');
+                }
+            });
+            
+            // Event: Clear canvas
+            btnClear.addEventListener('click', function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                currentImage = null;
+                originalImage = null;
+                bgImage = null;
+                logoImage = null;
+                offsetX = 0;
+                offsetY = 0;
+                scale = 1;
+                
+                // Reset text
+                textProperties.text = '';
+                textInput.value = '';
+                
+                // Reset image size inputs
+                imageWidth.value = '';
+                imageHeight.value = '';
+                resizeWidth.value = '';
+                resizeHeight.value = '';
+                
+                // Reset filters
+                filters = {
+                    brightness: 100,
+                    contrast: 100,
+                    saturation: 100,
+                    rotation: 0,
+                    flipH: 1,
+                    flipV: 1
+                };
+                
+                imageBrightness.value = 100;
+                imageContrast.value = 100;
+                imageSaturation.value = 100;
+                imageRotation.value = 0;
+                brightnessValue.textContent = '100%';
+                contrastValue.textContent = '100%';
+                saturationValue.textContent = '100%';
+                rotationValue.textContent = '0°';
+                
+                dropArea.style.display = 'flex';
+                directLink.style.display = 'none';
+                
+                drawCanvas();
+            });
+            
+            // Event: Center image
+            btnCenter.addEventListener('click', centerImage);
+            
+            // Event: Fit image
+            btnFit.addEventListener('click', fitImage);
+            
+            // Event: Fill image
+            btnFill.addEventListener('click', fillImage);
+            
+            // Event: Change background color
+            bgColorPicker.addEventListener('input', function() {
+                ctx.fillStyle = this.value;
+                bgImage = null;
+                
+                // Update color palette selection
+                colorBoxes.forEach(box => box.classList.remove('selected'));
+                drawCanvas();
+            });
+            
+            // Event: Color palette selection
+            colorBoxes.forEach(box => {
+                box.addEventListener('click', function() {
+                    const color = this.getAttribute('data-color');
+                    ctx.fillStyle = color;
+                    bgImage = null;
+                    bgColorPicker.value = color;
+                    
+                    // Update selection
+                    colorBoxes.forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    drawCanvas();
+                });
+            });
+            
+            // Event: Text color selection
+            textColorBoxes.forEach(box => {
+                box.addEventListener('click', function() {
+                    const color = this.getAttribute('data-color');
+                    textProperties.color = color;
+                    textColorPicker.value = color;
+                    
+                    // Update selection
+                    textColorBoxes.forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    drawCanvas();
+                });
+            });
+            
+            // Event: Transparent background
+            btnTransparent.addEventListener('click', function() {
+                ctx.fillStyle = 'transparent';
+                bgImage = null;
+                drawCanvas();
+            });
+            
+            // Event: Upload background image
+            btnUploadBg.addEventListener('click', function() {
+                bgImageUpload.click();
+            });
+            
+            bgImageUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            bgImage = img;
+                            drawCanvas();
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Event: Resize canvas
+            btnResizeCanvas.addEventListener('click', function() {
+                const width = parseInt(canvasWidth.value) || 800;
+                const height = parseInt(canvasHeight.value) || 600;
+                
+                if (width > 0 && height > 0) {
+                    // Maintain aspect ratio if locked
+                    if (lockAspect.checked && currentImage) {
+                        const imgRatio = currentImage.width / currentImage.height;
+                        canvas.height = width / imgRatio;
+                        canvasHeight.value = Math.round(canvas.height);
+                    } else {
+                        canvas.width = width;
+                        canvas.height = height;
+                    }
+                    
+                    drawCanvas();
+                }
+            });
+            
+            // Event: Social size buttons
+            socialButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const size = this.getAttribute('data-size').split('x');
+                    const width = parseInt(size[0]);
+                    const height = parseInt(size[1]);
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvasWidth.value = width;
+                    canvasHeight.value = height;
+                    
+                    drawCanvas();
+                });
+            });
+            
+            // Event: Resize image
+            btnResizeImage.addEventListener('click', function() {
+                if (!currentImage) {
+                    alert('Please upload an image first');
+                    return;
+                }
+                
+                let newWidth = parseInt(resizeWidth.value) || currentImage.width;
+                let newHeight = parseInt(resizeHeight.value) || currentImage.height;
+                
+                if (newWidth <= 0 || newHeight <= 0) {
+                    alert('Please enter valid width and height values');
+                    return;
+                }
+                
+                // Maintain aspect ratio if locked
+                if (lockImageAspect.checked) {
+                    const imgRatio = currentImage.width / currentImage.height;
+                    if (resizeWidth.value && !resizeHeight.value) {
+                        newHeight = Math.round(newWidth / imgRatio);
+                        resizeHeight.value = newHeight;
+                    } else if (resizeHeight.value && !resizeWidth.value) {
+                        newWidth = Math.round(newHeight * imgRatio);
+                        resizeWidth.value = newWidth;
+                    } else {
+                        newHeight = Math.round(newWidth / imgRatio);
+                        resizeHeight.value = newHeight;
+                    }
+                }
+                
+                resizeImage(newWidth, newHeight);
+            });
+            
+            // Event: Maintain aspect ratio when resizing image
+            resizeWidth.addEventListener('input', function() {
+                if (lockImageAspect.checked && currentImage && this.value) {
+                    const imgRatio = currentImage.width / currentImage.height;
+                    resizeHeight.value = Math.round(this.value / imgRatio);
+                }
+            });
+            
+            resizeHeight.addEventListener('input', function() {
+                if (lockImageAspect.checked && currentImage && this.value) {
+                    const imgRatio = currentImage.width / currentImage.height;
+                    resizeWidth.value = Math.round(this.value * imgRatio);
+                }
+            });
+            
+            // Event: Image filter changes
+            imageBrightness.addEventListener('input', function() {
+                filters.brightness = this.value;
+                brightnessValue.textContent = `${this.value}%`;
+                drawCanvas();
+            });
+            
+            imageContrast.addEventListener('input', function() {
+                filters.contrast = this.value;
+                contrastValue.textContent = `${this.value}%`;
+                drawCanvas();
+            });
+            
+            imageSaturation.addEventListener('input', function() {
+                filters.saturation = this.value;
+                saturationValue.textContent = `${this.value}%`;
+                drawCanvas();
+            });
+            
+            imageRotation.addEventListener('input', function() {
+                filters.rotation = parseInt(this.value);
+                rotationValue.textContent = `${this.value}°`;
+                drawCanvas();
+            });
+            
+            // Event: Flip image
+            btnFlipH.addEventListener('click', function() {
+                filters.flipH *= -1;
+                drawCanvas();
+            });
+            
+            btnFlipV.addEventListener('click', function() {
+                filters.flipV *= -1;
+                drawCanvas();
+            });
+            
+            // Event: Reset filters
+            btnResetFilters.addEventListener('click', function() {
+                filters = {
+                    brightness: 100,
+                    contrast: 100,
+                    saturation: 100,
+                    rotation: 0,
+                    flipH: 1,
+                    flipV: 1
+                };
+                
+                imageBrightness.value = 100;
+                imageContrast.value = 100;
+                imageSaturation.value = 100;
+                imageRotation.value = 0;
+                brightnessValue.textContent = '100%';
+                contrastValue.textContent = '100%';
+                saturationValue.textContent = '100%';
+                rotationValue.textContent = '0°';
+                
+                drawCanvas();
+            });
+            
+            // Event: Text size slider
+            textSize.addEventListener('input', function() {
+                textProperties.size = this.value;
+                textSizeValue.textContent = `${this.value}px`;
+                drawCanvas();
+            });
+            
+            // Event: Add text to canvas
+            btnAddText.addEventListener('click', function() {
+                if (!textInput.value) {
+                    alert('Please enter some text');
+                    return;
+                }
+                
+                textProperties.text = textInput.value;
+                
+                // Center text by default
+                ctx.font = `${textProperties.bold ? 'bold ' : ''}${textProperties.italic ? 'italic ' : ''}${textProperties.size}px ${textProperties.font}`;
+                const textWidth = ctx.measureText(textProperties.text).width;
+                textProperties.x = (canvas.width - textWidth) / 2;
+                textProperties.y = canvas.height / 2;
+                
+                activeLayer = layers.text;
+                drawCanvas();
+            });
+            
+            // Event: Text formatting buttons
+            btnBold.addEventListener('click', function() {
+                textProperties.bold = !textProperties.bold;
+                this.classList.toggle('active');
+                drawCanvas();
+            });
+            
+            btnItalic.addEventListener('click', function() {
+                textProperties.italic = !textProperties.italic;
+                this.classList.toggle('active');
+                drawCanvas();
+            });
+            
+            btnUnderline.addEventListener('click', function() {
+                textProperties.underline = !textProperties.underline;
+                this.classList.toggle('active');
+                drawCanvas();
+            });
+            
+            // Event: Font family change
+            fontFamily.addEventListener('change', function() {
+                textProperties.font = this.value;
+                drawCanvas();
+            });
+            
+            // Event: Text color change
+            textColorPicker.addEventListener('input', function() {
+                textProperties.color = this.value;
+                drawCanvas();
+            });
+            
+            // Event: Add logo
+            btnAddLogo.addEventListener('click', function() {
+                logoUpload.click();
+            });
+            
+            logoUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            logoImage = img;
+                            logoOffsetX = 20;
+                            logoOffsetY = 20;
+                            logoScale = 0.2;
+                            activeLayer = layers.logo;
+                            drawCanvas();
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Event: Logo positioning
+            btnToFront.addEventListener('click', function() {
+                if (logoImage) {
+                    activeLayer = layers.logo;
+                    drawCanvas();
+                }
+            });
+            
+            btnToBack.addEventListener('click', function() {
+                if (logoImage) {
+                    // Send logo behind the main image
+                    activeLayer = layers.image;
+                    drawCanvas();
+                }
+            });
+            
+            // Event: Mouse down for dragging
+            canvas.addEventListener('mousedown', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Check if clicking on logo
+                if (logoImage) {
+                    const logoWidth = logoImage.width * logoScale;
+                    const logoHeight = logoImage.height * logoScale;
+                    
+                    if (x >= logoOffsetX && x <= logoOffsetX + logoWidth &&
+                        y >= logoOffsetY && y <= logoOffsetY + logoHeight) {
+                        isDraggingLogo = true;
+                        startX = x - logoOffsetX;
+                        startY = y - logoOffsetY;
+                        canvas.style.cursor = 'grabbing';
+                        return;
+                    }
+                }
+                
+                // Check if clicking on text
+                if (textProperties.text) {
+                    ctx.font = `${textProperties.bold ? 'bold ' : ''}${textProperties.italic ? 'italic ' : ''}${textProperties.size}px ${textProperties.font}`;
+                    const textWidth = ctx.measureText(textProperties.text).width;
+                    
+                    if (x >= textProperties.x && x <= textProperties.x + textWidth &&
+                        y >= textProperties.y - textProperties.size && y <= textProperties.y) {
+                        isDraggingText = true;
+                        startX = x - textProperties.x;
+                        startY = y - textProperties.y;
+                        canvas.style.cursor = 'grabbing';
+                        return;
+                    }
+                }
+                
+                // Otherwise, drag the main image
+                if (currentImage) {
+                    isDragging = true;
+                    startX = e.clientX - offsetX;
+                    startY = e.clientY - offsetY;
+                    canvas.style.cursor = 'grabbing';
+                }
+            });
+            
+            // Event: Mouse move for dragging
+            canvas.addEventListener('mousemove', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (isDragging) {
+                    offsetX = x - startX;
+                    offsetY = y - startY;
+                    drawCanvas();
+                } else if (isDraggingLogo) {
+                    logoOffsetX = x - startX;
+                    logoOffsetY = y - startY;
+                    drawCanvas();
+                } else if (isDraggingText) {
+                    textProperties.x = x - startX;
+                    textProperties.y = y - startY;
+                    drawCanvas();
+                }
+            });
+            
+            // Event: Mouse up for dragging
+            canvas.addEventListener('mouseup', function() {
+                isDragging = false;
+                isDraggingLogo = false;
+                isDraggingText = false;
+                canvas.style.cursor = 'default';
+            });
+            
+            canvas.addEventListener('mouseleave', function() {
+                isDragging = false;
+                isDraggingLogo = false;
+                isDraggingText = false;
+                canvas.style.cursor = 'default';
+            });
+            
+            // Event: Download image
+            btnDownload.addEventListener('click', function() {
+                if (!currentImage) {
+                    alert('Please upload an image first');
+                    return;
+                }
+                
+                const link = document.createElement('a');
+                let mimeType = 'image/png';
+                
+                if (currentFormat === 'jpg') mimeType = 'image/jpeg';
+                else if (currentFormat === 'webp') mimeType = 'image/webp';
+                else if (currentFormat === 'gif') mimeType = 'image/gif';
+                
+                link.download = `edited-image.${currentFormat}`;
+                link.href = canvas.toDataURL(mimeType);
+                link.click();
+            });
+            
+            // Event: Remove background using remove.bg API
+            btnRemoveBg.addEventListener('click', function() {
+                if (!currentImage) {
+                    alert('Please upload an image first');
+                    return;
+                }
+                
+                loadingIndicator.style.display = 'block';
+                
+                // Create a temporary canvas to get the image data
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = currentImage.width;
+                tempCanvas.height = currentImage.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(currentImage, 0, 0);
+                
+                tempCanvas.toBlob(function(blob) {
+                    const formData = new FormData();
+                    formData.append('image_file', blob);
+                    
+                    // Use remove.bg API
+                    fetch('https://api.remove.bg/v1.0/removebg', {
+                        method: 'POST',
+                        headers: {
+                            'X-Api-Key': 'YuXZpK8JcFt6nVQ6yBcTHaD2'
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Background removal failed: ' + response.statusText);
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // Create URL from the returned blob
+                        const url = URL.createObjectURL(blob);
+                        loadImage(url);
+                        loadingIndicator.style.display = 'none';
+                        alert('Background removed successfully!');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        loadingIndicator.style.display = 'none';
+                        alert('Failed to remove background. Please check console for details.');
+                    });
+                });
+            });
+            
+            // Event: Upload to Postimages.org
+            btnUpload.addEventListener('click', function() {
+                if (!currentImage) {
+                    alert('Please upload an image first');
+                    return;
+                }
+                
+                canvas.toBlob(function(blob) {
+                    const fd = new FormData();
+                    fd.append('token', '61aa06d6116f7331ad7b2ba9c7fb707ec9b182e8');
+                    fd.append('upload_session', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+                    fd.append('numfiles', '1');
+                    fd.append('upload_referer', 'https://getsharex.com/');
+                    fd.append('file', blob, 'image.png');
+
+                    fetch('https://postimg.cc/json', { method: 'POST', body: fd })
+                        .then(res => res.json())
+                        .then(result => {
+                            if (result && result.url) {
+                                directLink.value = result.url;
+                                directLink.style.display = 'block';
+                                navigator.clipboard?.writeText(result.url).catch(() => {});
+                                alert('Upload successful - direct link copied to clipboard');
+                                window.open(result.url, '_blank');
+                            } else if (result && result.image && result.image.display_url) {
+                                directLink.value = result.image.display_url;
+                                directLink.style.display = 'block';
+                                navigator.clipboard?.writeText(result.image.display_url).catch(() => {});
+                                alert('Upload successful - direct link copied');
+                                window.open(result.image.display_url, '_blank');
+                            } else {
+                                console.log(result);
+                                alert('Upload failed or unexpected response. See console for details.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Upload error', err);
+                            alert('Error uploading image. Check console for details.');
+                        });
+                }, 'image/png');
+            });
+            
+            // Event: Paste from clipboard
+            btnPaste.addEventListener('click', function() {
+                navigator.clipboard.readText().then(text => {
+                    imageUrl.value = text;
+                    loadImage(text);
+                }).catch(err => {
+                    alert('Could not read from clipboard: ' + err);
+                });
+            });
+            
+            // Load image on pressing Enter in URL input
+            imageUrl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    btnLoad.click();
+                }
+            });
+        });
     </script>
 </body>
 </html>
