@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Neon HTML Encoder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(15, 12, 41, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 247, 255, 0.5);
+            border: 1px solid rgba(0, 247, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff, #00ccff, #ff00cc);
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0.7;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff;
+        }
+
+        .upload-section {
+            margin-bottom: 25px;
+        }
+
+        .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .file-input-label {
+            background: linear-gradient(45deg, #ff00cc, #3333ff);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 0, 204, 0.5);
+            font-weight: bold;
+        }
+
+        .file-input-label:hover {
+            box-shadow: 0 0 15px rgba(255, 0, 204, 0.8);
+            transform: translateY(-2px);
+        }
+
+        #file-name {
+            margin-left: 15px;
+            color: #00ccff;
+        }
+
+        .encoding-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .encoding-group {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 204, 255, 0.3);
+        }
+
+        .encoding-group h3 {
+            margin-bottom: 10px;
+            color: #00ccff;
+            text-shadow: 0 0 5px #00ccff;
+        }
+
+        .encoding-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .encoding-option input {
+            margin-right: 8px;
+            accent-color: #00ccff;
+        }
+
+        .encoding-option label {
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .code-area {
+            margin-bottom: 25px;
+        }
+
+        .code-area textarea {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ccff;
+            border-radius: 8px;
+            padding: 15px;
+            color: #fff;
+            font-size: 1rem;
+            resize: vertical;
+            box-shadow: 0 0 10px rgba(0, 204, 255, 0.3);
+        }
+
+        .code-area textarea:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.7);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-encrypt {
+            background: linear-gradient(45deg, #ff00cc, #3333ff);
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 0, 204, 0.5);
+        }
+
+        .btn-clear {
+            background: linear-gradient(45deg, #ff9900, #ff3300);
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 153, 0, 0.5);
+        }
+
+        .btn-copy {
+            background: linear-gradient(45deg, #00cc66, #00ccff);
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 204, 102, 0.5);
+        }
+
+        .btn-run {
+            background: linear-gradient(45deg, #ffcc00, #ff6600);
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+        }
+
+        .result-section {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .result-section h2 {
+            margin-bottom: 15px;
+            color: #fff;
+            text-shadow: 0 0 10px #00ccff;
+        }
+
+        #result {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ccff;
+            border-radius: 8px;
+            padding: 15px;
+            color: #fff;
+            font-size: 1rem;
+            overflow-y: auto;
+            box-shadow: 0 0 10px rgba(0, 204, 255, 0.3);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .preview-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 204, 255, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #00ccff;
+        }
+
+        .hidden-inputs {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .encoding-options {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced HTML Code Encoder</h1>
+        
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <label for="html-file" class="file-input-label">Upload HTML File</label>
+                <input type="file" id="html-file" accept=".html,.htm" style="display: none;">
+                <span id="file-name">No file chosen</span>
+            </div>
+        </div>
+        
+        <div class="encoding-options">
+            <div class="encoding-group">
+                <h3>Normal Encoding</h3>
+                <div class="encoding-option">
+                    <input type="radio" id="normal-1" name="encoding" value="normal1" checked>
+                    <label for="normal-1">Normal encoding 1 (HTML Entities)</label>
+                </div>
+                <div class="encoding-option">
+                    <input type="radio" id="normal-2" name="encoding" value="normal2">
+                    <label for="normal-2">Normal encoding 2 (Character Shift)</label>
+                </div>
+                <div class="encoding-option">
+                    <input type="radio" id="normal-3" name="encoding" value="normal3">
+                    <label for="normal-3">Normal encoding 3 (Reverse + Entities)</label>
+                </div>
+            </div>
+            
+            <div class="encoding-group">
+                <h3>Full Encoding</h3>
+                <div class="encoding-option">
+                    <input type="radio" id="full-1" name="encoding" value="full1">
+                    <label for="full-1">Full encoding 1 (Base64)</label>
+                </div>
+                <div class="encoding-option">
+                    <input type="radio" id="full-2" name="encoding" value="full2">
+                    <label for="full-2">Full encoding 2 (Base64 + XOR)</label>
+                </div>
+                <div class="encoding-option">
+                    <input type="radio" id="full-3" name="encoding" value="full3">
+                    <label for="full-3">Full encoding 3 (Custom Algorithm)</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="code-area">
+            <textarea id="html-code" placeholder="Paste Your HTML Code Here To Encrypt"></textarea>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn btn-encrypt" id="encrypt-btn">Encrypt</button>
+            <button class="btn btn-clear" id="clear-btn">Clear Code</button>
+            <button class="btn btn-copy" id="copy-btn">Copy Code</button>
+            <button class="btn btn-run" id="run-btn">Run Code</button>
+        </div>
+        
+        <div class="result-section" id="result-section">
+            <h2>Encrypted Code:</h2>
+            <div id="result"></div>
+            <div class="preview-info">
+                <p><strong>How to use encrypted code:</strong> Copy the encrypted code and paste it into any HTML file. For full encoding methods, include the decoder script provided below the encrypted code.</p>
+            </div>
+        </div>
+        
+        <div class="hidden-inputs">
+            <input type="text" id="stored-email" value="example@email.com">
+            <input type="text" id="stored-username" value="johndoe">
+            <div id="user-info" data-email="example@email.com" data-username="johndoe"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('html-file');
+            const fileName = document.getElementById('file-name');
+            const htmlCode = document.getElementById('html-code');
+            const encryptBtn = document.getElementById('encrypt-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const runBtn = document.getElementById('run-btn');
+            const resultSection = document.getElementById('result-section');
+            const result = document.getElementById('result');
+            
+            // File upload handling
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    fileName.textContent = this.files[0].name;
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        htmlCode.value = e.target.result;
+                    };
+                    reader.readAsText(this.files[0]);
+                } else {
+                    fileName.textContent = 'No file chosen';
+                }
+            });
+            
+            // Encryption functions
+            function normalEncoding1(code) {
+                // HTML Entities encoding
+                return code
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;')
+                    .replace(/\//g, '&#x2F;');
+            }
+            
+            function normalEncoding2(code) {
+                // Character shift encoding
+                let encoded = '';
+                for (let i = 0; i < code.length; i++) {
+                    encoded += String.fromCharCode(code.charCodeAt(i) + 1);
+                }
+                return encoded;
+            }
+            
+            function normalEncoding3(code) {
+                // Reverse + HTML Entities
+                let reversed = code.split('').reverse().join('');
+                return normalEncoding1(reversed);
+            }
+            
+            function fullEncoding1(code) {
+                // Base64 encoding
+                return btoa(unescape(encodeURIComponent(code)));
+            }
+            
+            function fullEncoding2(code) {
+                // Base64 + XOR encoding
+                let key = 'HTMLENCODER';
+                let xorEncoded = '';
+                for (let i = 0; i < code.length; i++) {
+                    xorEncoded += String.fromCharCode(code.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+                }
+                return btoa(unescape(encodeURIComponent(xorEncoded)));
+            }
+            
+            function fullEncoding3(code) {
+                // Custom algorithm - Base64 + Character rotation + Key insertion
+                let base64Encoded = btoa(unescape(encodeURIComponent(code)));
+                let rotated = '';
+                for (let i = 0; i < base64Encoded.length; i++) {
+                    rotated += String.fromCharCode(base64Encoded.charCodeAt(i) + 5);
+                }
+                return rotated;
+            }
+            
+            // Decryption functions
+            function normalDecoding2(code) {
+                // Character shift decoding
+                let decoded = '';
+                for (let i = 0; i < code.length; i++) {
+                    decoded += String.fromCharCode(code.charCodeAt(i) - 1);
+                }
+                return decoded;
+            }
+            
+            function normalDecoding3(code) {
+                // Reverse + HTML Entities decoding
+                let decoded = code
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'")
+                    .replace(/&#x2F;/g, '/');
+                return decoded.split('').reverse().join('');
+            }
+            
+            function fullDecoding2(code) {
+                // Base64 + XOR decoding
+                let key = 'HTMLENCODER';
+                let base64Decoded = decodeURIComponent(escape(atob(code)));
+                let decoded = '';
+                for (let i = 0; i < base64Decoded.length; i++) {
+                    decoded += String.fromCharCode(base64Decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+                }
+                return decoded;
+            }
+            
+            function fullDecoding3(code) {
+                // Custom algorithm decoding
+                let derotated = '';
+                for (let i = 0; i < code.length; i++) {
+                    derotated += String.fromCharCode(code.charCodeAt(i) - 5);
+                }
+                return decodeURIComponent(escape(atob(derotated)));
+            }
+            
+            // Encrypt button
+            encryptBtn.addEventListener('click', function() {
+                if (!htmlCode.value.trim()) {
+                    alert('Please enter HTML code to encrypt!');
+                    return;
+                }
+                
+                const encodingMethod = document.querySelector('input[name="encoding"]:checked').value;
+                let encryptedCode = '';
+                let decoderScript = '';
+                
+                switch(encodingMethod) {
+                    case 'normal1':
+                        encryptedCode = normalEncoding1(htmlCode.value);
+                        decoderScript = `
+<!-- No decoder needed for Normal Encoding 1 - it's standard HTML entities -->
+`;
+                        break;
+                    case 'normal2':
+                        encryptedCode = normalEncoding2(htmlCode.value);
+                        decoderScript = `
+<script>
+    // Decoder for Normal Encoding 2
+    function decodeNormal2(encoded) {
+        let decoded = '';
+        for (let i = 0; i < encoded.length; i++) {
+            decoded += String.fromCharCode(encoded.charCodeAt(i) - 1);
+        }
+        return decoded;
+    }
+    document.write(decodeNormal2("${encryptedCode}"));
+<\/script>
+`;
+                        break;
+                    case 'normal3':
+                        encryptedCode = normalEncoding3(htmlCode.value);
+                        decoderScript = `
+<script>
+    // Decoder for Normal Encoding 3
+    function decodeNormal3(encoded) {
+        let decoded = encoded
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&#x2F;/g, '/');
+        return decoded.split('').reverse().join('');
+    }
+    document.write(decodeNormal3("${encryptedCode}"));
+<\/script>
+`;
+                        break;
+                    case 'full1':
+                        encryptedCode = fullEncoding1(htmlCode.value);
+                        decoderScript = `
+<script>
+    // Decoder for Full Encoding 1
+    document.write(decodeURIComponent(escape(atob("${encryptedCode}"))));
+<\/script>
+`;
+                        break;
+                    case 'full2':
+                        encryptedCode = fullEncoding2(htmlCode.value);
+                        decoderScript = `
+<script>
+    // Decoder for Full Encoding 2
+    function decodeFull2(encoded) {
+        let key = 'HTMLENCODER';
+        let base64Decoded = decodeURIComponent(escape(atob(encoded)));
+        let decoded = '';
+        for (let i = 0; i < base64Decoded.length; i++) {
+            decoded += String.fromCharCode(base64Decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        }
+        return decoded;
+    }
+    document.write(decodeFull2("${encryptedCode}"));
+<\/script>
+`;
+                        break;
+                    case 'full3':
+                        encryptedCode = fullEncoding3(htmlCode.value);
+                        decoderScript = `
+<script>
+    // Decoder for Full Encoding 3
+    function decodeFull3(encoded) {
+        let derotated = '';
+        for (let i = 0; i < encoded.length; i++) {
+            derotated += String.fromCharCode(encoded.charCodeAt(i) - 5);
+        }
+        return decodeURIComponent(escape(atob(derotated)));
+    }
+    document.write(decodeFull3("${encryptedCode}"));
+<\/script>
+`;
+                        break;
+                }
+                
+                result.textContent = encryptedCode + '\n\n<!-- Copy the code below to use in your HTML file -->\n' + decoderScript;
+                resultSection.style.display = 'block';
+            });
+            
+            // Clear button
+            clearBtn.addEventListener('click', function() {
+                htmlCode.value = '';
+                result.textContent = '';
+                resultSection.style.display = 'none';
+                fileInput.value = '';
+                fileName.textContent = 'No file chosen';
+            });
+            
+            // Copy button
+            copyBtn.addEventListener('click', function() {
+                if (!result.textContent) {
+                    alert('No encrypted code to copy!');
+                    return;
+                }
+                
+                navigator.clipboard.writeText(result.textContent)
+                    .then(() => {
+                        alert('Code copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        alert('Failed to copy code to clipboard.');
+                    });
+            });
+            
+            // Run button
+            runBtn.addEventListener('click', function() {
+                if (!result.textContent) {
+                    alert('No encrypted code to run!');
+                    return;
+                }
+                
+                const encodingMethod = document.querySelector('input[name="encoding"]:checked').value;
+                let codeToRun = '';
+                
+                switch(encodingMethod) {
+                    case 'normal1':
+                        codeToRun = htmlCode.value;
+                        break;
+                    case 'normal2':
+                        codeToRun = normalDecoding2(result.textContent.split('\n')[0]);
+                        break;
+                    case 'normal3':
+                        codeToRun = normalDecoding3(result.textContent.split('\n')[0]);
+                        break;
+                    case 'full1':
+                        codeToRun = decodeURIComponent(escape(atob(result.textContent.split('\n')[0])));
+                        break;
+                    case 'full2':
+                        codeToRun = fullDecoding2(result.textContent.split('\n')[0]);
+                        break;
+                    case 'full3':
+                        codeToRun = fullDecoding3(result.textContent.split('\n')[0]);
+                        break;
+                }
+                
+                // Open in new window
+                const newWindow = window.open();
+                newWindow.document.write(codeToRun);
+                newWindow.document.close();
+            });
+        });
+    </script>
+</body>
+</html>
