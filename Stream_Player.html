@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            height: 100%;
+            overflow-x: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+        }
+        
+        /* Disable text selection and image drag */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+        }
+        
+        .desktop-container {
+            display: flex;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .video-section {
+            flex: 0 0 70%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .controls-section {
+            flex: 0 0 30%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Player */
+        .video-container {
+            flex: 1;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            aspect-ratio: 16/9;
+        }
+        
+        .video-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #player, #player-mobile {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .video-watermark {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            bottom: 25%;
+            left: 10%;
+            z-index: 10;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+        }
+        
+        .fullscreen .video-watermark {
+            width: 100px;
+            height: 100px;
+        }
+        
+        /* Controls */
+        .controls-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+        
+        .url-input-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .url-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #444;
+            background: #1a1a1a;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .url-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25), inset 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .btn {
+            padding: 10px 8px;
+            background: linear-gradient(145deg, #2d2d2d, #222);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0px);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(145deg, #007bff, #0056b3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(145deg, #28a745, #1e7e34);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(145deg, #ffc107, #e0a800);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(145deg, #dc3545, #c82333);
+        }
+        
+        .btn-info {
+            background: linear-gradient(145deg, #17a2b8, #138496);
+        }
+        
+        .btn-telegram {
+            background: linear-gradient(145deg, #0088cc, #006699);
+        }
+        
+        .btn-icon {
+            margin-right: 4px;
+            font-size: 12px;
+        }
+        
+        /* Animation for buttons */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* Recent Links Section */
+        .recent-links-container {
+            width: 100%;
+            margin-top: 20px;
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+        
+        .recent-links-container.show {
+            display: block;
+        }
+        
+        .recent-links-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .recent-links-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .recent-links-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .recent-link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: rgba(40, 40, 40, 0.7);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .recent-link-item:hover {
+            background: rgba(50, 50, 50, 0.9);
+        }
+        
+        .recent-link-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        .recent-link-time {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .recent-link-url {
+            font-size: 14px;
+            color: #fff;
+            word-break: break-all;
+        }
+        
+        .recent-link-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            color: #0056b3;
+        }
+        
+        .action-btn.delete {
+            color: #dc3545;
+        }
+        
+        .action-btn.delete:hover {
+            color: #c82333;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        /* Mobile layout */
+        .mobile-container {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .mobile-video-container {
+            height: 40vh;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            position: relative;
+        }
+
+        .mobile-video-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #000;
+        }
+
+        /* Responsive design for mobile */
+        @media (max-width: 1024px) {
+            .desktop-container {
+                display: none;
+            }
+            
+            .mobile-container {
+                display: flex;
+            }
+            
+            .button-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .btn {
+                font-size: 11px;
+                padding: 8px 5px;
+                min-height: 35px;
+            }
+            
+            .btn-icon {
+                margin-right: 3px;
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .button-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .mobile-container {
+                padding: 10px;
+                gap: 15px;
+            }
+            
+            .mobile-video-container {
+                height: 35vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="desktop-container">
+    <!-- Video Section (70%) -->
+    <div class="video-section">
+        <div class="video-container">
+            <div class="video-wrapper">
+                <img src="https://i.postimg.cc/cHqsM7Tw/Green-Leaf-Minimalist-Reminder-Quotes-Facebook-Video.gif" class="video-watermark" alt="logo">
+                <div id="player"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Controls Section (30%) -->
+    <div class="controls-section">
+        <div class="controls-container">
+            <div class="url-input-container">
+                <input type="text" id="url-input" class="url-input" placeholder="Enter Streaming URL/Link">
+            </div>
+            <div class="button-container">
+                <button id="play-button" class="btn btn-primary">
+                    <span class="btn-icon">▶</span> Play Video
+                </button>
+                <button id="paste-button" class="btn btn-success">
+                    <span class="btn-icon">📋</span> Paste
+                </button>
+                <button id="recent-button" class="btn btn-info">
+                    <span class="btn-icon">🕒</span> Recent
+                </button>
+                <button id="join-button" class="btn btn-telegram">
+                    <span class="btn-icon">📢</span> Join Us
+                </button>
+                <button id="clear-button" class="btn btn-warning">
+                    <span class="btn-icon">🗑️</span> Clear
+                </button>
+                <button id="refresh-button" class="btn btn-danger">
+                    <span class="btn-icon">🔄</span> Refresh
+                </button>
+            </div>
+            
+            <!-- Recent Links Section -->
+            <div class="recent-links-container" id="recent-links-container">
+                <div class="recent-links-header">
+                    <div class="recent-links-title">Recent Streaming Links (Last 72 Hours)</div>
+                    <button id="close-recent-button" class="btn btn-warning">Close</button>
+                </div>
+                <div class="recent-links-list" id="recent-links-list">
+                    <!-- Recent links will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Layout -->
+<div class="mobile-container">
+    <!-- Player -->
+    <div class="mobile-video-container">
+        <div class="mobile-video-wrapper">
+            <img src="https://i.postimg.cc/d1hHy4ss/11.png" class="video-watermark" alt="logo">
+            <div id="player-mobile"></div>
+        </div>
+    </div>
+    
+    <!-- Controls -->
+    <div class="controls-container">
+        <div class="url-input-container">
+            <input type="text" id="url-input-mobile" class="url-input" placeholder="Enter Streaming URL/Link">
+        </div>
+        <div class="button-container">
+            <button id="play-button-mobile" class="btn btn-primary">
+                <span class="btn-icon">▶</span> Play Video
+            </button>
+            <button id="paste-button-mobile" class="btn btn-success">
+                <span class="btn-icon">📋</span> Paste
+            </button>
+            <button id="recent-button-mobile" class="btn btn-info">
+                <span class="btn-icon">🕒</span> Recent
+            </button>
+            <button id="join-button-mobile" class="btn btn-telegram">
+                <span class="btn-icon">📢</span> Join Us
+            </button>
+            <button id="clear-button-mobile" class="btn btn-warning">
+                <span class="btn-icon">🗑️</span> Clear
+            </button>
+            <button id="refresh-button-mobile" class="btn btn-danger">
+                <span class="btn-icon">🔄</span> Refresh
+            </button>
+        </div>
+        
+        <!-- Recent Links Section -->
+        <div class="recent-links-container" id="recent-links-container-mobile">
+            <div class="recent-links-header">
+                <div class="recent-links-title">Recent Streaming Links (Last 72 Hours)</div>
+                <button id="close-recent-button-mobile" class="btn btn-warning">Close</button>
+            </div>
+            <div class="recent-links-list" id="recent-links-list-mobile">
+                <!-- Recent links will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBL6nN2TH4uyp8iso6Q99_QHkYyHnslXjU",
+        authDomain: "tg-bot-sirome-tv.firebaseapp.com",
+        databaseURL: "https://tg-bot-sirome-tv-default-rtdb.firebaseio.com",
+        projectId: "tg-bot-sirome-tv",
+        storageBucket: "tg-bot-sirome-tv.firebasestorage.app",
+        messagingSenderId: "764854962010",
+        appId: "1:764854962010:web:6a77f650622614de4d5563",
+        measurementId: "G-8G48FV41TH"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Global variables
+    let player;
+    let playerMobile;
+    let lastUrl = localStorage.getItem('lastVideoUrl') || '';
+    let recentLinks = [];
+    
+    // Default URL (this will not be saved to recent links)
+    const defaultUrl = "https://i.postimg.cc/cHqsM7Tw/Green-Leaf-Minimalist-Reminder-Quotes-Facebook-Video.gif";
+
+    // Initialize player
+    function initPlayer(url, isMobile = false) {
+        const playerId = isMobile ? "#player-mobile" : "#player";
+        
+        // Destroy existing player if any
+        if (isMobile && playerMobile) {
+            playerMobile.destroy();
+            playerMobile = null;
+        } else if (!isMobile && player) {
+            player.destroy();
+            player = null;
+        }
+        
+        console.log(`Initializing player for: ${url} on ${isMobile ? 'mobile' : 'desktop'}`);
+        
+        try {
+            const newPlayer = new Clappr.Player({
+                source: url,
+                parentId: playerId,
+                autoPlay: true,
+                mute: false,
+                width: "100%",
+                height: "100%",
+                poster: "https://i.postimg.cc/cJBhWxv5/3122396-ico-Copy.png",
+                plugins: [],
+                playback: {
+                    hlsjsConfig: {
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                        backBufferLength: 90
+                    }
+                }
+            });
+
+            // Add event listeners
+            newPlayer.on('ready', function() {
+                console.log('Player is ready');
+                showToast('Video loaded successfully', 'success');
+            });
+
+            newPlayer.on('error', function(error) {
+                console.error('Player error:', error);
+                showToast('Error loading video', 'error');
+            });
+
+            newPlayer.on('play', function() {
+                console.log('Video started playing');
+            });
+
+            // Handle fullscreen changes for logo
+            newPlayer.on('fullscreen', function(isFullscreen) {
+                const videoContainer = isMobile ? 
+                    document.querySelector('.mobile-video-container') : 
+                    document.querySelector('.video-container');
+                
+                if (isFullscreen) {
+                    videoContainer.classList.add('fullscreen');
+                } else {
+                    videoContainer.classList.remove('fullscreen');
+                }
+            });
+
+            if (isMobile) {
+                playerMobile = newPlayer;
+            } else {
+                player = newPlayer;
+            }
+            
+            return newPlayer;
+        } catch (error) {
+            console.error('Error initializing player:', error);
+            showToast('Error initializing player', 'error');
+            return null;
+        }
+    }
+
+    // Play a channel
+    function playChannel(url, isMobile = false) {
+        if (!url) {
+            showToast('Please enter a valid URL', 'warning');
+            return;
+        }
+        
+        // Validate URL format
+        if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('//')) {
+            url = 'https://' + url;
+        }
+        
+        showToast('Loading video...', 'info');
+        
+        console.log(`Playing channel: ${url} on ${isMobile ? 'mobile' : 'desktop'}`);
+        
+        // Update URL input field - only if it's not the default URL
+        if (url !== defaultUrl) {
+            if (isMobile) {
+                document.getElementById('url-input-mobile').value = url;
+            } else {
+                document.getElementById('url-input').value = url;
+            }
+        } else {
+            // Clear the input field for default URL
+            if (isMobile) {
+                document.getElementById('url-input-mobile').value = '';
+            } else {
+                document.getElementById('url-input').value = '';
+            }
+        }
+        
+        // Initialize or update player
+        const currentPlayer = isMobile ? playerMobile : player;
+        if (currentPlayer) {
+            try {
+                currentPlayer.load(url);
+                currentPlayer.configure({ 
+                    autoPlay: true, 
+                    poster: "https://i.postimg.cc/cJBhWxv5/3122396-ico-Copy.png"
+                });
+            } catch (error) {
+                console.error('Error loading video:', error);
+                initPlayer(url, isMobile);
+            }
+        } else {
+            initPlayer(url, isMobile);
+        }
+        
+        // Save URL to localStorage (except for default URL)
+        if (url !== defaultUrl) {
+            localStorage.setItem('lastVideoUrl', url);
+            lastUrl = url;
+            
+            // Save to recent links in Firebase (except for default URL)
+            saveRecentLink(url);
+        }
+    }
+
+    // Save recent link to Firebase Realtime Database
+    async function saveRecentLink(url) {
+        // Don't save the default URL to recent links
+        if (url === defaultUrl) {
+            return;
+        }
+        
+        try {
+            const timestamp = new Date().getTime();
+            const linkId = 'link_' + timestamp;
+            const expiresAt = timestamp + (72 * 60 * 60 * 1000); // 72 hours from now
+            
+            const linkData = {
+                url: url,
+                timestamp: timestamp,
+                expiresAt: expiresAt,
+                formattedTime: formatDateTime(new Date(timestamp))
+            };
+            
+            await db.ref('recentLinks/' + linkId).set(linkData);
+            console.log('Recent link saved to Firebase');
+        } catch (error) {
+            console.error('Error saving recent link:', error);
+            showToast('Error saving recent link', 'error');
+        }
+    }
+
+    // Load recent links from Firebase Realtime Database
+    async function loadRecentLinks(isMobile = false) {
+        try {
+            const now = new Date().getTime();
+            const snapshot = await db.ref('recentLinks').orderByChild('expiresAt').startAt(now).once('value');
+            
+            recentLinks = [];
+            snapshot.forEach((childSnapshot) => {
+                const data = childSnapshot.val();
+                // Filter out the default URL from recent links
+                if (data.url !== defaultUrl) {
+                    recentLinks.push({
+                        id: childSnapshot.key,
+                        url: data.url,
+                        timestamp: data.timestamp,
+                        expiresAt: data.expiresAt,
+                        formattedTime: data.formattedTime
+                    });
+                }
+            });
+            
+            // Sort by timestamp (newest first)
+            recentLinks.sort((a, b) => b.timestamp - a.timestamp);
+            
+            displayRecentLinks(isMobile);
+        } catch (error) {
+            console.error('Error loading recent links:', error);
+            showToast('Error loading recent links', 'error');
+        }
+    }
+
+    // Display recent links in the UI
+    function displayRecentLinks(isMobile = false) {
+        const recentLinksListId = isMobile ? 'recent-links-list-mobile' : 'recent-links-list';
+        const recentLinksList = document.getElementById(recentLinksListId);
+        
+        if (recentLinks.length === 0) {
+            recentLinksList.innerHTML = '<div class="empty-state">No recent links found</div>';
+            return;
+        }
+        
+        recentLinksList.innerHTML = '';
+        
+        // Calculate reverse serial numbers
+        const totalLinks = recentLinks.length;
+        
+        recentLinks.forEach((link, index) => {
+            const linkItem = document.createElement('div');
+            linkItem.className = 'recent-link-item';
+            
+            // Reverse serial number: newest gets highest number
+            const serialNumber = String(totalLinks - index).padStart(2, '0');
+            
+            linkItem.innerHTML = `
+                <div class="recent-link-info">
+                    <div class="recent-link-time">${serialNumber} - ${link.formattedTime}</div>
+                    <div class="recent-link-url">${link.url}</div>
+                </div>
+                <div class="recent-link-actions">
+                    <button class="action-btn play" data-url="${link.url}">Play</button>
+                    <button class="action-btn delete" data-id="${link.id}">Delete</button>
+                </div>
+            `;
+            
+            recentLinksList.appendChild(linkItem);
+        });
+        
+        // Add event listeners to action buttons
+        document.querySelectorAll('.action-btn.play').forEach(button => {
+            button.addEventListener('click', function() {
+                const url = this.getAttribute('data-url');
+                const urlInput = isMobile ? document.getElementById('url-input-mobile') : document.getElementById('url-input');
+                urlInput.value = url;
+                playChannel(url, isMobile);
+                hideRecentLinks(isMobile);
+            });
+        });
+        
+        document.querySelectorAll('.action-btn.delete').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                deleteRecentLink(id);
+            });
+        });
+    }
+
+    // Delete a recent link
+    async function deleteRecentLink(id) {
+        try {
+            await db.ref('recentLinks/' + id).remove();
+            showToast('Link deleted', 'success');
+            loadRecentLinks(); // Refresh the list
+        } catch (error) {
+            console.error('Error deleting recent link:', error);
+            showToast('Error deleting link', 'error');
+        }
+    }
+
+    // Format date and time
+    function formatDateTime(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        hours = String(hours).padStart(2, '0');
+        
+        return `${day}-${month}-${year}:${hours}:${minutes}${ampm}`;
+    }
+
+    // Show recent links
+    function showRecentLinks(isMobile = false) {
+        loadRecentLinks(isMobile);
+        const containerId = isMobile ? 'recent-links-container-mobile' : 'recent-links-container';
+        document.getElementById(containerId).classList.add('show');
+    }
+
+    // Hide recent links
+    function hideRecentLinks(isMobile = false) {
+        const containerId = isMobile ? 'recent-links-container-mobile' : 'recent-links-container';
+        document.getElementById(containerId).classList.remove('show');
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        
+        // Set background color based on type
+        if (type === 'success') {
+            toast.style.background = '#28a745';
+        } else if (type === 'warning') {
+            toast.style.background = '#ffc107';
+            toast.style.color = '#212529';
+        } else if (type === 'error') {
+            toast.style.background = '#dc3545';
+        } else {
+            toast.style.background = '#007bff';
+        }
+        
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // Auto cleanup expired links (runs every hour)
+    function cleanupExpiredLinks() {
+        const now = new Date().getTime();
+        db.ref('recentLinks').orderByChild('expiresAt').endAt(now).once('value')
+            .then(snapshot => {
+                const updates = {};
+                snapshot.forEach(childSnapshot => {
+                    updates[childSnapshot.key] = null;
+                });
+                
+                if (Object.keys(updates).length > 0) {
+                    db.ref('recentLinks').update(updates);
+                    console.log('Cleaned up expired links:', Object.keys(updates).length);
+                }
+            })
+            .catch(error => {
+                console.error('Error cleaning up expired links:', error);
+            });
+    }
+
+    // Setup event listeners for desktop
+    function setupDesktopListeners() {
+        const urlInput = document.getElementById('url-input');
+        const playButton = document.getElementById('play-button');
+        const pasteButton = document.getElementById('paste-button');
+        const recentButton = document.getElementById('recent-button');
+        const joinButton = document.getElementById('join-button');
+        const clearButton = document.getElementById('clear-button');
+        const refreshButton = document.getElementById('refresh-button');
+        const closeRecentButton = document.getElementById('close-recent-button');
+
+        // Event listeners
+        playButton.addEventListener('click', () => {
+            playChannel(urlInput.value, false);
+        });
+
+        pasteButton.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                urlInput.value = text;
+                playChannel(text, false);
+                showToast('URL pasted successfully', 'success');
+            } catch (err) {
+                console.error('Failed to read clipboard contents: ', err);
+                showToast('Failed to paste from clipboard', 'error');
+            }
+        });
+
+        recentButton.addEventListener('click', () => {
+            showRecentLinks(false);
+        });
+
+        joinButton.addEventListener('click', () => {
+            window.open('https://t.me/sirometube', '_blank');
+            showToast('Opening Telegram channel...', 'info');
+        });
+
+        clearButton.addEventListener('click', () => {
+            urlInput.value = '';
+            urlInput.focus();
+            showToast('URL cleared', 'info');
+        });
+
+        refreshButton.addEventListener('click', () => {
+            if (lastUrl && lastUrl !== defaultUrl) {
+                urlInput.value = lastUrl;
+                playChannel(lastUrl, false);
+                showToast('Last URL restored', 'success');
+            } else {
+                showToast('No previous URL found', 'warning');
+            }
+        });
+
+        closeRecentButton.addEventListener('click', () => {
+            hideRecentLinks(false);
+        });
+
+        // Auto-play when URL changes
+        urlInput.addEventListener('input', () => {
+            if (urlInput.value.trim()) {
+                playButton.classList.add('pulse');
+            } else {
+                playButton.classList.remove('pulse');
+            }
+        });
+
+        urlInput.addEventListener('change', () => {
+            playChannel(urlInput.value, false);
+        });
+    }
+
+    // Setup event listeners for mobile
+    function setupMobileListeners() {
+        const urlInput = document.getElementById('url-input-mobile');
+        const playButton = document.getElementById('play-button-mobile');
+        const pasteButton = document.getElementById('paste-button-mobile');
+        const recentButton = document.getElementById('recent-button-mobile');
+        const joinButton = document.getElementById('join-button-mobile');
+        const clearButton = document.getElementById('clear-button-mobile');
+        const refreshButton = document.getElementById('refresh-button-mobile');
+        const closeRecentButton = document.getElementById('close-recent-button-mobile');
+
+        // Event listeners
+        playButton.addEventListener('click', () => {
+            playChannel(urlInput.value, true);
+        });
+
+        pasteButton.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                urlInput.value = text;
+                playChannel(text, true);
+                showToast('URL pasted successfully', 'success');
+            } catch (err) {
+                console.error('Failed to read clipboard contents: ', err);
+                showToast('Failed to paste from clipboard', 'error');
+            }
+        });
+
+        recentButton.addEventListener('click', () => {
+            showRecentLinks(true);
+        });
+
+        joinButton.addEventListener('click', () => {
+            window.open('https://t.me/sirometube', '_blank');
+            showToast('Opening Telegram channel...', 'info');
+        });
+
+        clearButton.addEventListener('click', () => {
+            urlInput.value = '';
+            urlInput.focus();
+            showToast('URL cleared', 'info');
+        });
+
+        refreshButton.addEventListener('click', () => {
+            if (lastUrl && lastUrl !== defaultUrl) {
+                urlInput.value = lastUrl;
+                playChannel(lastUrl, true);
+                showToast('Last URL restored', 'success');
+            } else {
+                showToast('No previous URL found', 'warning');
+            }
+        });
+
+        closeRecentButton.addEventListener('click', () => {
+            hideRecentLinks(true);
+        });
+
+        // Auto-play when URL changes
+        urlInput.addEventListener('input', () => {
+            if (urlInput.value.trim()) {
+                playButton.classList.add('pulse');
+            } else {
+                playButton.classList.remove('pulse');
+            }
+        });
+
+        urlInput.addEventListener('change', () => {
+            playChannel(urlInput.value, true);
+        });
+    }
+
+    // Load last URL on page load
+    window.addEventListener('load', () => {
+        setupDesktopListeners();
+        setupMobileListeners();
+        
+        // Clear any previous default URL from localStorage
+        if (lastUrl === "https://owrcoveryy.gpcdn.net/bpk-tv/1715/output/index.r") {
+            localStorage.removeItem('lastVideoUrl');
+            lastUrl = '';
+        }
+        
+        // Auto-play the default URL immediately - with proper timing
+        console.log('Auto-playing default video on load...');
+        
+        // Use setTimeout to ensure DOM is fully ready
+        setTimeout(() => {
+            playChannel(defaultUrl, false); // Desktop
+            playChannel(defaultUrl, true);  // Mobile
+        }, 500);
+        
+        // Add pulse effect to play buttons if there's content
+        if (lastUrl && lastUrl.trim() && lastUrl !== defaultUrl) {
+            document.getElementById('play-button').classList.add('pulse');
+            document.getElementById('play-button-mobile').classList.add('pulse');
+        }
+        
+        // Start auto cleanup
+        cleanupExpiredLinks();
+        setInterval(cleanupExpiredLinks, 60 * 60 * 1000); // Run every hour
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + V to paste
+        if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+            e.preventDefault();
+            const isMobile = window.innerWidth <= 1024;
+            if (isMobile) {
+                document.getElementById('paste-button-mobile').click();
+            } else {
+                document.getElementById('paste-button').click();
+            }
+        }
+        
+        // Ctrl/Cmd + L to focus URL input
+        if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+            e.preventDefault();
+            const isMobile = window.innerWidth <= 1024;
+            const urlInput = isMobile ? document.getElementById('url-input-mobile') : document.getElementById('url-input');
+            urlInput.focus();
+            urlInput.select();
+        }
+        
+        // Enter to play
+        if (e.key === 'Enter') {
+            const isMobile = window.innerWidth <= 1024;
+            const urlInput = isMobile ? document.getElementById('url-input-mobile') : document.getElementById('url-input');
+            if (document.activeElement === urlInput) {
+                e.preventDefault();
+                if (isMobile) {
+                    document.getElementById('play-button-mobile').click();
+                } else {
+                    document.getElementById('play-button').click();
+                }
+            }
+        }
+        
+        // Escape to clear
+        if (e.key === 'Escape') {
+            const isMobile = window.innerWidth <= 1024;
+            const urlInput = isMobile ? document.getElementById('url-input-mobile') : document.getElementById('url-input');
+            if (document.activeElement === urlInput) {
+                e.preventDefault();
+                if (isMobile) {
+                    document.getElementById('clear-button-mobile').click();
+                } else {
+                    document.getElementById('clear-button').click();
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
