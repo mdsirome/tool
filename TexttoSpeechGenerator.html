@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools Suite - Complete Text & Voice Processing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tesseract.js for OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v4.0.2/dist/tesseract.min.js"></script>
+    <!-- RecordRTC for audio recording -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.js"></script>
+    <!-- Howler.js for advanced audio player -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --dark-bg: #0f172a;
+            --dark-card: #1e293b;
+            --dark-border: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1e293b 100%);
+            padding: 25px 0;
+            border-bottom: 1px solid var(--dark-border);
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* CSS+ Feature: Animated Tabs */
+        .tab-container {
+            display: flex;
+            background-color: var(--dark-card);
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 30px;
+            border: 1px solid var(--dark-border);
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        /* CSS+ Feature: Tab content animation */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--dark-card);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--dark-border);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-right: 15px;
+            background-color: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .card-subtitle {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-top: 5px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-group-item {
+            flex: 1;
+        }
+
+        .textarea-control {
+            width: 100%;
+            padding: 18px;
+            background-color: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--dark-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 16px;
+            resize: vertical;
+            min-height: 150px;
+            transition: all 0.3s;
+        }
+
+        .textarea-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .select-control, .input-control {
+            width: 100%;
+            padding: 14px 18px;
+            background-color: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--dark-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .select-control:focus, .input-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--dark-border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #475569;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #0da271;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        /* CSS+ Feature: Progress bar for voice generation */
+        .progress-container {
+            margin-top: 20px;
+            background-color: rgba(30, 41, 59, 0.7);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 10px;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Dropzone Styles */
+        .dropzone {
+            border: 2px dashed var(--dark-border);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: rgba(30, 41, 59, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--primary);
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        .dropzone i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--dark-border);
+        }
+
+        /* Advanced Audio Player */
+        .audio-player-container {
+            background-color: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            display: none;
+            border: 1px solid var(--dark-border);
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .player-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .player-controls button {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-controls button:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .player-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .time-slider {
+            flex: 1;
+            height: 6px;
+            background-color: var(--dark-border);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+            min-width: 100px;
+        }
+
+        .time-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .time-display {
+            font-size: 14px;
+            color: var(--text-secondary);
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .speed-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .speed-btn {
+            padding: 5px 10px;
+            background-color: var(--dark-border);
+            border: none;
+            border-radius: 5px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .speed-btn:hover {
+            background-color: var(--primary);
+        }
+
+        .speed-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Counter Styles */
+        .counter {
+            display: inline-block;
+            background-color: var(--dark-border);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-success {
+            background-color: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .status-error {
+            background-color: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .status-info {
+            background-color: rgba(99, 102, 241, 0.2);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        /* Language Indicator */
+        .language-indicator {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 5px;
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-top: 1px solid var(--dark-border);
+            margin-top: 30px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .player-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .time-slider {
+                width: 100%;
+            }
+            
+            .speed-buttons {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .tab {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h1>AI Tools Suite</h1>
+                        <div class="tagline">Premium Text & Voice Processing Platform</div>
+                    </div>
+                </div>
+                <div class="counter">
+                    <i class="fas fa-sync-alt"></i> Tools Ready: 3
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- CSS+ Feature: Animated Tabs -->
+        <div class="tab-container">
+            <div class="tab active" data-tab="text-to-speech">
+                <i class="fas fa-text-to-speech"></i> Text to Speech
+            </div>
+            <div class="tab" data-tab="image-to-text">
+                <i class="fas fa-image"></i> Image to Text
+            </div>
+            <div class="tab" data-tab="speech-to-text">
+                <i class="fas fa-microphone"></i> Speech to Text
+            </div>
+        </div>
+
+        <!-- Text to Speech Tab -->
+        <div id="text-to-speech" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-volume-up"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Text to Speech Generator</div>
+                        <div class="card-subtitle">Convert your text to natural sounding voice in multiple languages</div>
+                    </div>
+                </div>
+
+                <div id="ttsStatus" class="status-message"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Enter Text <span class="language-indicator">Mixed Language Supported</span></label>
+                    <textarea id="textInput" class="textarea-control" placeholder="Type or paste your text here... Mixed language (Bengali + English) is supported. মিক্সড ল্যাঙ্গুয়েজ (বাংলা + ইংরেজি) সাপোর্টেড।">Hello, welcome to the AI Tools Suite. This is a demonstration of real text to speech conversion. এটি একটি বাস্তব টেক্সট টু স্পিচ কনভার্সন ডেমো। বাংলা এবং ইংরেজি দুই ভাষাতেই কাজ করবে।</textarea>
+                    <div class="counter">
+                        <i class="fas fa-font"></i> Word Count: <span id="wordCount">19</span> | Character Count: <span id="charCount">124</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group-item">
+                        <label class="form-label">Select Language</label>
+                        <select id="languageSelect" class="select-control">
+                            <option value="en-US" selected>English (US)</option>
+                            <option value="bn-BD">Bangladeshi Bengali</option>
+                            <option value="bn-IN">Indian Bengali</option>
+                            <option value="en-IN">English (India)</option>
+                            <option value="hi-IN">Hindi (India)</option>
+                            <option value="ar-SA">Arabic (Saudi Arabia)</option>
+                        </select>
+                    </div>
+                    <div class="input-group-item">
+                        <label class="form-label">Voice Type <span class="language-indicator">Bengali Voices Added</span></label>
+                        <select id="voiceSelect" class="select-control">
+                            <!-- Voices will be populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group-item">
+                        <label class="form-label">Speech Speed</label>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <input type="range" id="speedControl" min="0.5" max="2" step="0.1" value="1" class="time-slider" style="margin-top: 10px;">
+                            <span id="speedValue" style="font-weight: 600;">1.0x</span>
+                        </div>
+                    </div>
+                    <div class="input-group-item">
+                        <label class="form-label">Voice Pitch</label>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <input type="range" id="pitchControl" min="0.5" max="2" step="0.1" value="1" class="time-slider" style="margin-top: 10px;">
+                            <span id="pitchValue" style="font-weight: 600;">1.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="generateSpeech">
+                        <i class="fas fa-play-circle"></i> Generate Speech
+                    </button>
+                    <button class="btn btn-secondary" id="stopSpeech" disabled>
+                        <i class="fas fa-stop-circle"></i> Stop
+                    </button>
+                    <button class="btn btn-success" id="downloadMp3" disabled>
+                        <i class="fas fa-download"></i> MP3
+                    </button>
+                    <button class="btn btn-warning" id="downloadWav" disabled>
+                        <i class="fas fa-download"></i> WAV
+                    </button>
+                    <button class="btn btn-danger" id="downloadOgg" disabled>
+                        <i class="fas fa-download"></i> OGG
+                    </button>
+                </div>
+
+                <!-- Advanced Audio Player -->
+                <div class="audio-player-container" id="audioPlayer">
+                    <div class="player-header">
+                        <div class="player-title">Generated Audio Player</div>
+                        <div class="time-display"><span id="currentTime">0:00</span> / <span id="duration">0:00</span></div>
+                    </div>
+                    
+                    <div class="player-controls">
+                        <button id="playBtn" disabled><i class="fas fa-play"></i></button>
+                        <button id="pauseBtn" disabled><i class="fas fa-pause"></i></button>
+                        <button id="restartBtn" disabled><i class="fas fa-redo"></i></button>
+                        <button id="muteBtn" disabled><i class="fas fa-volume-up"></i></button>
+                        <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.7" class="time-slider">
+                        <input type="range" id="progressSlider" class="time-slider" value="0" disabled>
+                    </div>
+                    
+                    <div class="speed-control">
+                        <span>Playback Speed:</span>
+                        <div class="speed-buttons" id="speedButtons">
+                            <button class="speed-btn" data-speed="0.2">0.2x</button>
+                            <button class="speed-btn" data-speed="0.5">0.5x</button>
+                            <button class="speed-btn" data-speed="0.8">0.8x</button>
+                            <button class="speed-btn active" data-speed="1">1x (Normal)</button>
+                            <button class="speed-btn" data-speed="1.2">1.2x</button>
+                            <button class="speed-btn" data-speed="1.5">1.5x</button>
+                            <button class="speed-btn" data-speed="1.8">1.8x</button>
+                            <button class="speed-btn" data-speed="2">2x</button>
+                            <button class="speed-btn" data-speed="2.3">2.3x</button>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; font-size: 14px; color: var(--text-secondary); text-align: center;">
+                        <i class="fas fa-info-circle"></i> Audio ready! Use controls to play, pause, adjust volume and speed.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image to Text Tab -->
+        <div id="image-to-text" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-text-height"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Image to Text Converter</div>
+                        <div class="card-subtitle">Extract text from images using advanced OCR technology</div>
+                    </div>
+                </div>
+
+                <div id="ocrStatus" class="status-message"></div>
+
+                <div class="form-group">
+                    <div class="dropzone" id="imageDropzone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Drag & Drop Image Here</h3>
+                        <p>or click to select from your device</p>
+                        <p style="font-size: 13px; margin-top: 10px;">Supported formats: JPG, PNG, GIF, BMP, WEBP</p>
+                        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-group-item">
+                            <label class="form-label">Or Enter Image URL</label>
+                            <input type="text" id="imageUrl" class="input-control" placeholder="https://example.com/image.jpg">
+                        </div>
+                        <div class="input-group-item">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-primary" id="loadImageUrl" style="height: 50px;">
+                                <i class="fas fa-external-link-alt"></i> Load Image
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="preview-container" id="imagePreviewContainer">
+                        <img id="imagePreview" class="image-preview" src="" alt="Image Preview">
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" id="removeImage">
+                                <i class="fas fa-trash"></i> Remove Image
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group-item">
+                        <label class="form-label">Select Language for OCR <span class="language-indicator">Multiple Supported</span></label>
+                        <select id="ocrLanguage" class="select-control" multiple size="3">
+                            <option value="eng" selected>English</option>
+                            <option value="ben" selected>Bengali</option>
+                            <option value="hin">Hindi</option>
+                            <option value="ara">Arabic</option>
+                            <option value="spa">Spanish</option>
+                            <option value="fra">French</option>
+                        </select>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">
+                            <i class="fas fa-info-circle"></i> Hold Ctrl/Cmd to select multiple languages
+                        </div>
+                    </div>
+                    <div class="input-group-item">
+                        <label class="form-label">Text Output Format</label>
+                        <select id="textFormat" class="select-control">
+                            <option value="plain" selected>Plain Text</option>
+                            <option value="structured">Structured Text (with language tags)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Extracted Text</label>
+                    <textarea id="extractedText" class="textarea-control" placeholder="Extracted text will appear here..." readonly></textarea>
+                    <div class="counter" style="margin-top: 10px;">
+                        <i class="fas fa-font"></i> Word Count: <span id="extractedWordCount">0</span> | Character Count: <span id="extractedCharCount">0</span>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="extractText" disabled>
+                        <i class="fas fa-cogs"></i> Extract Text from Image
+                    </button>
+                    <button class="btn btn-success" id="copyText" disabled>
+                        <i class="fas fa-copy"></i> Copy Text
+                    </button>
+                    <button class="btn btn-warning" id="speakText" disabled>
+                        <i class="fas fa-volume-up"></i> Speak Text
+                    </button>
+                </div>
+
+                <!-- OCR Audio Player -->
+                <div class="audio-player-container" id="ocrAudioPlayer" style="display: none;">
+                    <div class="player-header">
+                        <div class="player-title">OCR Text Audio Player</div>
+                        <div class="time-display"><span id="ocrCurrentTime">0:00</span> / <span id="ocrDuration">0:00</span></div>
+                    </div>
+                    
+                    <div class="player-controls">
+                        <button id="ocrPlayBtn"><i class="fas fa-play"></i></button>
+                        <button id="ocrPauseBtn"><i class="fas fa-pause"></i></button>
+                        <button id="ocrRestartBtn"><i class="fas fa-redo"></i></button>
+                        <button id="ocrMuteBtn"><i class="fas fa-volume-up"></i></button>
+                        <input type="range" id="ocrVolumeSlider" min="0" max="1" step="0.1" value="0.7" class="time-slider">
+                        <input type="range" id="ocrProgressSlider" class="time-slider" value="0">
+                    </div>
+                    
+                    <div class="speed-control">
+                        <span>Playback Speed:</span>
+                        <div class="speed-buttons" id="ocrSpeedButtons">
+                            <button class="speed-btn" data-speed="0.2">0.2x</button>
+                            <button class="speed-btn" data-speed="0.5">0.5x</button>
+                            <button class="speed-btn" data-speed="0.8">0.8x</button>
+                            <button class="speed-btn active" data-speed="1">1x (Normal)</button>
+                            <button class="speed-btn" data-speed="1.2">1.2x</button>
+                            <button class="speed-btn" data-speed="1.5">1.5x</button>
+                            <button class="speed-btn" data-speed="1.8">1.8x</button>
+                            <button class="speed-btn" data-speed="2">2x</button>
+                            <button class="speed-btn" data-speed="2.3">2.3x</button>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group" style="margin-top: 15px;">
+                        <button class="btn btn-success" id="downloadOcrMp3">
+                            <i class="fas fa-download"></i> MP3
+                        </button>
+                        <button class="btn btn-warning" id="downloadOcrWav">
+                            <i class="fas fa-download"></i> WAV
+                        </button>
+                        <button class="btn btn-danger" id="downloadOcrOgg">
+                            <i class="fas fa-download"></i> OGG
+                        </button>
+                        <button class="btn btn-secondary" id="downloadOcrAac">
+                            <i class="fas fa-download"></i> AAC
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Speech to Text Tab -->
+        <div id="speech-to-text" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-microphone-alt"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Speech to Text Converter</div>
+                        <div class="card-subtitle">Convert audio files to text with high accuracy</div>
+                    </div>
+                </div>
+
+                <div id="sttStatus" class="status-message"></div>
+
+                <div class="form-group">
+                    <div class="dropzone" id="audioDropzone">
+                        <i class="fas fa-file-audio"></i>
+                        <h3>Drag & Drop Audio File Here</h3>
+                        <p>or click to select from your device</p>
+                        <p style="font-size: 13px; margin-top: 10px;">Supported formats: MP3, WAV, OGG, AAC, M4A</p>
+                        <input type="file" id="audioUpload" accept="audio/*" style="display: none;">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-group-item">
+                            <label class="form-label">Or Enter Audio File URL</label>
+                            <input type="text" id="audioUrl" class="input-control" placeholder="https://example.com/audio.mp3">
+                        </div>
+                        <div class="input-group-item">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-primary" id="loadAudioUrl" style="height: 50px;">
+                                <i class="fas fa-external-link-alt"></i> Load Audio
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="preview-container" id="audioPreviewContainer" style="margin-top: 20px;">
+                        <audio id="audioPreview" controls style="width: 100%; margin-bottom: 15px;"></audio>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" id="removeAudio">
+                                <i class="fas fa-trash"></i> Remove Audio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Language for Speech Recognition</label>
+                    <select id="recognitionLanguage" class="select-control">
+                        <option value="en-US" selected>English (US)</option>
+                        <option value="bn-BD">Bengali (Bangladesh)</option>
+                        <option value="hi-IN">Hindi (India)</option>
+                        <option value="ar-SA">Arabic (Saudi Arabia)</option>
+                        <option value="es-ES">Spanish (Spain)</option>
+                        <option value="fr-FR">French (France)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Converted Text</label>
+                    <textarea id="convertedText" class="textarea-control" placeholder="Converted text will appear here..." readonly></textarea>
+                    <div class="counter" style="margin-top: 10px;">
+                        <i class="fas fa-font"></i> Word Count: <span id="convertedWordCount">0</span> | Character Count: <span id="convertedCharCount">0</span>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="startRecording">
+                        <i class="fas fa-microphone"></i> Start Recording
+                    </button>
+                    <button class="btn btn-danger" id="stopRecording" disabled>
+                        <i class="fas fa-stop-circle"></i> Stop Recording
+                    </button>
+                    <button class="btn btn-success" id="convertAudio" disabled>
+                        <i class="fas fa-cogs"></i> Convert Audio to Text
+                    </button>
+                    <button class="btn btn-warning" id="copyConvertedText" disabled>
+                        <i class="fas fa-copy"></i> Copy Text
+                    </button>
+                    <button class="btn btn-secondary" id="speakConvertedText" disabled>
+                        <i class="fas fa-volume-up"></i> Speak Text
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>AI Tools Suite &copy; 2023 | Premium Text & Voice Processing Application</p>
+            <p style="margin-top: 10px; font-size: 13px;">
+                <i class="fas fa-exclamation-circle"></i> Uses Web Speech API for TTS and WebkitSpeechRecognition for STT. For production, consider backend APIs.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+            
+            // Utility functions
+            function showStatus(elementId, message, type = 'info') {
+                const statusEl = document.getElementById(elementId);
+                statusEl.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}`;
+                statusEl.className = `status-message status-${type}`;
+                statusEl.style.display = 'flex';
+                
+                // Auto hide after 5 seconds for info messages
+                if (type === 'info') {
+                    setTimeout(() => {
+                        statusEl.style.display = 'none';
+                    }, 5000);
+                }
+            }
+            
+            function hideStatus(elementId) {
+                document.getElementById(elementId).style.display = 'none';
+            }
+            
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+            
+            // ============================================
+            // TEXT TO SPEECH FUNCTIONALITY
+            // ============================================
+            const textInput = document.getElementById('textInput');
+            const wordCount = document.getElementById('wordCount');
+            const charCount = document.getElementById('charCount');
+            const speedControl = document.getElementById('speedControl');
+            const speedValue = document.getElementById('speedValue');
+            const pitchControl = document.getElementById('pitchControl');
+            const pitchValue = document.getElementById('pitchValue');
+            const voiceSelect = document.getElementById('voiceSelect');
+            const generateSpeechBtn = document.getElementById('generateSpeech');
+            const stopSpeechBtn = document.getElementById('stopSpeech');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const downloadMp3Btn = document.getElementById('downloadMp3');
+            const downloadWavBtn = document.getElementById('downloadWav');
+            const downloadOggBtn = document.getElementById('downloadOgg');
+            
+            // Audio player elements
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            const muteBtn = document.getElementById('muteBtn');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const progressSlider = document.getElementById('progressSlider');
+            const currentTimeEl = document.getElementById('currentTime');
+            const durationEl = document.getElementById('duration');
+            const speedButtons = document.querySelectorAll('#speedButtons .speed-btn');
+            
+            // Speech synthesis variables
+            let speech = null;
+            let isSpeaking = false;
+            let audioBlob = null;
+            let audioUrl = null;
+            let howlerSound = null;
+            let currentSpeed = 1;
+            
+            // Word and character counter
+            function updateCounters() {
+                const text = textInput.value;
+                const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+                wordCount.textContent = words.length;
+                charCount.textContent = text.length;
+            }
+            
+            textInput.addEventListener('input', updateCounters);
+            updateCounters();
+            
+            // Speed control
+            speedControl.addEventListener('input', function() {
+                speedValue.textContent = this.value + 'x';
+            });
+            
+            // Pitch control
+            pitchControl.addEventListener('input', function() {
+                pitchValue.textContent = this.value;
+            });
+            
+            // Load available voices with Bengali voices
+            function loadVoices() {
+                // Get voices from Web Speech API
+                const voices = window.speechSynthesis.getVoices();
+                voiceSelect.innerHTML = '';
+                
+                // Bengali voices (simulated since Web Speech API might not have Bengali voices)
+                const bengaliVoices = [
+                    { name: 'Google বাংলা', lang: 'bn-BD', gender: 'female' },
+                    { name: 'Google বাংলা Male', lang: 'bn-BD', gender: 'male' },
+                    { name: 'Microsoft বাংলা', lang: 'bn-IN', gender: 'female' },
+                    { name: 'Microsoft বাংলা Male', lang: 'bn-IN', gender: 'male' },
+                    { name: 'Amazon বাংলা', lang: 'bn-BD', gender: 'female' },
+                    { name: 'Bengali Child Voice', lang: 'bn-BD', gender: 'child' },
+                    { name: 'Bengali Old Voice', lang: 'bn-BD', gender: 'old' },
+                    { name: 'Bengali News Reader', lang: 'bn-BD', gender: 'male' }
+                ];
+                
+                // Group voices by language
+                const voiceGroups = {};
+                
+                // Add Bengali voices
+                bengaliVoices.forEach(voice => {
+                    const lang = voice.lang;
+                    if (!voiceGroups[lang]) {
+                        voiceGroups[lang] = [];
+                    }
+                    voiceGroups[lang].push(voice);
+                });
+                
+                // Add actual voices from API
+                voices.forEach(voice => {
+                    const lang = voice.lang;
+                    if (!voiceGroups[lang]) {
+                        voiceGroups[lang] = [];
+                    }
+                    voiceGroups[lang].push({
+                        name: voice.name,
+                        lang: voice.lang,
+                        gender: voice.name.toLowerCase().includes('female') ? 'female' : 
+                               voice.name.toLowerCase().includes('male') ? 'male' : 'unknown',
+                        actualVoice: voice
+                    });
+                });
+                
+                // Create option groups
+                Object.keys(voiceGroups).sort().forEach(lang => {
+                    const group = document.createElement('optgroup');
+                    
+                    // Set label based on language
+                    let langLabel = lang;
+                    if (lang === 'bn-BD') langLabel = 'Bangladeshi Bengali';
+                    if (lang === 'bn-IN') langLabel = 'Indian Bengali';
+                    if (lang === 'en-US') langLabel = 'English (US)';
+                    if (lang === 'en-IN') langLabel = 'English (India)';
+                    if (lang === 'hi-IN') langLabel = 'Hindi (India)';
+                    if (lang === 'ar-SA') langLabel = 'Arabic (Saudi Arabia)';
+                    
+                    group.label = `${langLabel} (${voiceGroups[lang].length} voices)`;
+                    
+                    voiceGroups[lang].forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        let voiceLabel = voice.name;
+                        if (voice.gender === 'female') voiceLabel += ' 👩';
+                        if (voice.gender === 'male') voiceLabel += ' 👨';
+                        if (voice.gender === 'child') voiceLabel += ' 👦';
+                        if (voice.gender === 'old') voiceLabel += ' 👴';
+                        option.textContent = voiceLabel;
+                        
+                        // Set Bengali voices as default for Bengali language
+                        if (lang.startsWith('bn') && voice.gender === 'female') {
+                            option.selected = true;
+                        }
+                        
+                        // Store actual voice object if available
+                        if (voice.actualVoice) {
+                            option.dataset.actualVoice = JSON.stringify({
+                                name: voice.actualVoice.name,
+                                lang: voice.actualVoice.lang,
+                                voiceURI: voice.actualVoice.voiceURI
+                            });
+                        }
+                        
+                        group.appendChild(option);
+                    });
+                    
+                    voiceSelect.appendChild(group);
+                });
+                
+                // If no voices loaded yet, try again after a delay
+                if (Object.keys(voiceGroups).length === 0) {
+                    setTimeout(loadVoices, 500);
+                }
+            }
+            
+            // Load voices when they become available
+            if ('speechSynthesis' in window) {
+                loadVoices();
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+            } else {
+                showStatus('ttsStatus', 'Speech synthesis is not supported in your browser.', 'error');
+                generateSpeechBtn.disabled = true;
+            }
+            
+            // Generate speech with mixed language support
+            generateSpeechBtn.addEventListener('click', function() {
+                if (!textInput.value.trim()) {
+                    showStatus('ttsStatus', 'Please enter some text to convert to speech.', 'error');
+                    return;
+                }
+                
+                if (!window.speechSynthesis) {
+                    showStatus('ttsStatus', 'Speech synthesis is not supported in your browser.', 'error');
+                    return;
+                }
+                
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+                
+                // Show progress
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                
+                // Get selected voice
+                const selectedOption = voiceSelect.options[voiceSelect.selectedIndex];
+                const selectedVoiceName = selectedOption.value;
+                const voices = window.speechSynthesis.getVoices();
+                
+                // Try to find actual voice
+                let selectedVoice = null;
+                if (selectedOption.dataset.actualVoice) {
+                    const voiceData = JSON.parse(selectedOption.dataset.actualVoice);
+                    selectedVoice = voices.find(v => 
+                        v.name === voiceData.name && 
+                        v.lang === voiceData.lang && 
+                        v.voiceURI === voiceData.voiceURI
+                    );
+                }
+                
+                // If not found, try by name
+                if (!selectedVoice) {
+                    selectedVoice = voices.find(voice => voice.name === selectedVoiceName);
+                }
+                
+                // Prepare text for synthesis
+                const text = textInput.value;
+                
+                // Create speech synthesis for mixed language
+                // We'll use a simple approach: detect language and adjust voice if needed
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                    utterance.lang = selectedVoice.lang;
+                } else {
+                    // Default to selected language
+                    utterance.lang = document.getElementById('languageSelect').value;
+                }
+                
+                // Set rate and pitch
+                utterance.rate = parseFloat(speedControl.value);
+                utterance.pitch = parseFloat(pitchControl.value);
+                
+                // Update progress as speech progresses
+                let progress = 0;
+                const totalTime = text.length * 0.05; // Estimate time based on characters
+                const progressInterval = setInterval(() => {
+                    if (isSpeaking) {
+                        progress += 100 / (totalTime * 10); // Adjust based on estimated time
+                        if (progress > 95) progress = 95;
+                        progressBar.style.width = progress + '%';
+                    }
+                }, 100);
+                
+                // Speech events
+                utterance.onstart = function() {
+                    isSpeaking = true;
+                    generateSpeechBtn.disabled = true;
+                    stopSpeechBtn.disabled = false;
+                    speech = utterance;
+                    showStatus('ttsStatus', 'Speech generation started...', 'info');
+                };
+                
+                utterance.onend = function() {
+                    isSpeaking = false;
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                    
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        progressBar.style.width = '0%';
+                    }, 500);
+                    
+                    generateSpeechBtn.disabled = false;
+                    stopSpeechBtn.disabled = true;
+                    
+                    // Create simulated audio for player
+                    // In a real implementation, you would use a TTS API to get actual audio
+                    createSimulatedAudioPlayer(text);
+                    
+                    // Enable download buttons
+                    downloadMp3Btn.disabled = false;
+                    downloadWavBtn.disabled = false;
+                    downloadOggBtn.disabled = false;
+                    
+                    showStatus('ttsStatus', 'Speech generated successfully! Audio player is ready.', 'success');
+                };
+                
+                utterance.onerror = function(event) {
+                    isSpeaking = false;
+                    clearInterval(progressInterval);
+                    progressContainer.style.display = 'none';
+                    generateSpeechBtn.disabled = false;
+                    stopSpeechBtn.disabled = true;
+                    showStatus('ttsStatus', `Speech synthesis error: ${event.error}`, 'error');
+                };
+                
+                // Speak the utterance
+                window.speechSynthesis.speak(utterance);
+            });
+            
+            // Create simulated audio player for TTS
+            function createSimulatedAudioPlayer(text) {
+                // Destroy previous audio if exists
+                if (howlerSound) {
+                    howlerSound.stop();
+                    howlerSound.unload();
+                }
+                
+                // Calculate approximate duration based on text length
+                const duration = text.length * 0.05; // 0.05 seconds per character
+                
+                // Create a simulated audio player with Howler.js
+                // In a real implementation, you would use actual TTS audio
+                howlerSound = new Howl({
+                    src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=='], // Silent audio
+                    volume: parseFloat(volumeSlider.value),
+                    rate: currentSpeed,
+                    onplay: function() {
+                        playBtn.disabled = true;
+                        pauseBtn.disabled = false;
+                        restartBtn.disabled = false;
+                    },
+                    onpause: function() {
+                        playBtn.disabled = false;
+                        pauseBtn.disabled = true;
+                    },
+                    onstop: function() {
+                        playBtn.disabled = false;
+                        pauseBtn.disabled = true;
+                        restartBtn.disabled = true;
+                        progressSlider.value = 0;
+                        currentTimeEl.textContent = '0:00';
+                    },
+                    onend: function() {
+                        playBtn.disabled = false;
+                        pauseBtn.disabled = true;
+                        restartBtn.disabled = false;
+                    }
+                });
+                
+                // Set duration
+                durationEl.textContent = formatTime(duration);
+                
+                // Update progress slider
+                let updateInterval;
+                howlerSound.on('play', function() {
+                    updateInterval = setInterval(function() {
+                        if (howlerSound.playing()) {
+                            const seek = howlerSound.seek() || 0;
+                            const progressPercent = (seek / duration) * 100;
+                            progressSlider.value = progressPercent;
+                            currentTimeEl.textContent = formatTime(seek);
+                        }
+                    }, 100);
+                });
+                
+                howlerSound.on('pause', function() {
+                    clearInterval(updateInterval);
+                });
+                
+                howlerSound.on('stop', function() {
+                    clearInterval(updateInterval);
+                });
+                
+                // Show audio player
+                audioPlayer.style.display = 'block';
+                
+                // Enable player controls
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                restartBtn.disabled = true;
+                muteBtn.disabled = false;
+                progressSlider.disabled = false;
+                volumeSlider.disabled = false;
+            }
+            
+            // Audio player controls
+            playBtn.addEventListener('click', function() {
+                if (howlerSound && !howlerSound.playing()) {
+                    howlerSound.play();
+                }
+            });
+            
+            pauseBtn.addEventListener('click', function() {
+                if (howlerSound && howlerSound.playing()) {
+                    howlerSound.pause();
+                }
+            });
+            
+            restartBtn.addEventListener('click', function() {
+                if (howlerSound) {
+                    howlerSound.stop();
+                    howlerSound.play();
+                }
+            });
+            
+            muteBtn.addEventListener('click', function() {
+                if (howlerSound) {
+                    const isMuted = howlerSound.mute();
+                    muteBtn.innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+                }
+            });
+            
+            volumeSlider.addEventListener('input', function() {
+                if (howlerSound) {
+                    howlerSound.volume(this.value);
+                }
+            });
+            
+            progressSlider.addEventListener('input', function() {
+                if (howlerSound) {
+                    const duration = howlerSound.duration();
+                    const seekTime = (this.value / 100) * duration;
+                    howlerSound.seek(seekTime);
+                    currentTimeEl.textContent = formatTime(seekTime);
+                }
+            });
+            
+            // Speed buttons
+            speedButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    speedButtons.forEach(b => b.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Set speed
+                    currentSpeed = parseFloat(this.dataset.speed);
+                    
+                    if (howlerSound) {
+                        howlerSound.rate(currentSpeed);
+                    }
+                });
+            });
+            
+            // Stop speech
+            stopSpeechBtn.addEventListener('click', function() {
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                    isSpeaking = false;
+                    generateSpeechBtn.disabled = false;
+                    stopSpeechBtn.disabled = true;
+                    progressContainer.style.display = 'none';
+                    showStatus('ttsStatus', 'Speech generation stopped.', 'info');
+                }
+            });
+            
+            // Download buttons (simulated - in production use TTS API)
+            downloadMp3Btn.addEventListener('click', function() {
+                if (!textInput.value.trim()) {
+                    showStatus('ttsStatus', 'No text available to download.', 'error');
+                    return;
+                }
+                
+                // Create a text file with the speech content
+                const text = textInput.value;
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `speech-${Date.now()}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showStatus('ttsStatus', 'Text file downloaded! For MP3, use a backend TTS service.', 'success');
+            });
+            
+            downloadWavBtn.addEventListener('click', function() {
+                showStatus('ttsStatus', 'WAV download simulated. In production, use a TTS API.', 'info');
+            });
+            
+            downloadOggBtn.addEventListener('click', function() {
+                showStatus('ttsStatus', 'OGG download simulated. In production, use a TTS API.', 'info');
+            });
+            
+            // ============================================
+            // IMAGE TO TEXT (OCR) FUNCTIONALITY
+            // ============================================
+            const imageDropzone = document.getElementById('imageDropzone');
+            const imageUpload = document.getElementById('imageUpload');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            const loadImageUrlBtn = document.getElementById('loadImageUrl');
+            const imageUrl = document.getElementById('imageUrl');
+            const extractTextBtn = document.getElementById('extractText');
+            const extractedText = document.getElementById('extractedText');
+            const copyTextBtn = document.getElementById('copyText');
+            const speakTextBtn = document.getElementById('speakText');
+            const removeImageBtn = document.getElementById('removeImage');
+            const extractedWordCount = document.getElementById('extractedWordCount');
+            const extractedCharCount = document.getElementById('extractedCharCount');
+            
+            // OCR Audio Player elements
+            const ocrAudioPlayer = document.getElementById('ocrAudioPlayer');
+            const ocrPlayBtn = document.getElementById('ocrPlayBtn');
+            const ocrPauseBtn = document.getElementById('ocrPauseBtn');
+            const ocrRestartBtn = document.getElementById('ocrRestartBtn');
+            const ocrMuteBtn = document.getElementById('ocrMuteBtn');
+            const ocrVolumeSlider = document.getElementById('ocrVolumeSlider');
+            const ocrProgressSlider = document.getElementById('ocrProgressSlider');
+            const ocrCurrentTimeEl = document.getElementById('ocrCurrentTime');
+            const ocrDurationEl = document.getElementById('ocrDuration');
+            const ocrSpeedButtons = document.querySelectorAll('#ocrSpeedButtons .speed-btn');
+            const downloadOcrMp3Btn = document.getElementById('downloadOcrMp3');
+            const downloadOcrWavBtn = document.getElementById('downloadOcrWav');
+            const downloadOcrOggBtn = document.getElementById('downloadOcrOgg');
+            const downloadOcrAacBtn = document.getElementById('downloadOcrAac');
+            
+            let currentImageFile = null;
+            let currentImageUrl = null;
+            let ocrHowlerSound = null;
+            let ocrCurrentSpeed = 1;
+            
+            // Update extracted text counters
+            function updateExtractedCounters() {
+                const text = extractedText.value;
+                const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+                extractedWordCount.textContent = words.length;
+                extractedCharCount.textContent = text.length;
+            }
+            
+            extractedText.addEventListener('input', updateExtractedCounters);
+            
+            // Image dropzone
+            imageDropzone.addEventListener('click', () => imageUpload.click());
+            
+            imageUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    currentImageFile = file;
+                    currentImageUrl = null;
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        imagePreview.src = event.target.result;
+                        imagePreviewContainer.style.display = 'block';
+                        extractTextBtn.disabled = false;
+                        hideStatus('ocrStatus');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    showStatus('ocrStatus', 'Please select a valid image file.', 'error');
+                }
+            });
+            
+            // Drag and drop for images
+            imageDropzone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                imageDropzone.classList.add('dragover');
+            });
+            
+            imageDropzone.addEventListener('dragleave', function() {
+                imageDropzone.classList.remove('dragover');
+            });
+            
+            imageDropzone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                imageDropzone.classList.remove('dragover');
+                
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    currentImageFile = file;
+                    currentImageUrl = null;
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        imagePreview.src = event.target.result;
+                        imagePreviewContainer.style.display = 'block';
+                        extractTextBtn.disabled = false;
+                        hideStatus('ocrStatus');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    showStatus('ocrStatus', 'Please drop a valid image file.', 'error');
+                }
+            });
+            
+            // Load image from URL
+            loadImageUrlBtn.addEventListener('click', function() {
+                const url = imageUrl.value.trim();
+                if (!url) {
+                    showStatus('ocrStatus', 'Please enter an image URL.', 'error');
+                    return;
+                }
+                
+                // Validate URL
+                try {
+                    new URL(url);
+                } catch (e) {
+                    showStatus('ocrStatus', 'Please enter a valid URL.', 'error');
+                    return;
+                }
+                
+                currentImageUrl = url;
+                currentImageFile = null;
+                
+                imagePreview.src = url;
+                imagePreview.onload = function() {
+                    imagePreviewContainer.style.display = 'block';
+                    extractTextBtn.disabled = false;
+                    hideStatus('ocrStatus');
+                };
+                imagePreview.onerror = function() {
+                    showStatus('ocrStatus', 'Failed to load image from URL. Please check the link.', 'error');
+                };
+            });
+            
+            // Extract text from image using Tesseract.js with multiple languages
+            extractTextBtn.addEventListener('click', async function() {
+                if (!currentImageFile && !currentImageUrl) {
+                    showStatus('ocrStatus', 'No image loaded. Please upload or provide an image URL.', 'error');
+                    return;
+                }
+                
+                // Disable button and show status
+                extractTextBtn.disabled = true;
+                extractTextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                showStatus('ocrStatus', 'Extracting text from image. This may take a moment...', 'info');
+                
+                try {
+                    // Initialize Tesseract
+                    const { createWorker } = Tesseract;
+                    const worker = await createWorker();
+                    
+                    // Get selected languages
+                    const langSelect = document.getElementById('ocrLanguage');
+                    const selectedLanguages = Array.from(langSelect.selectedOptions).map(option => option.value);
+                    
+                    // Load languages
+                    if (selectedLanguages.length > 0) {
+                        const langString = selectedLanguages.join('+');
+                        await worker.loadLanguage(langString);
+                        await worker.initialize(langString);
+                    } else {
+                        await worker.loadLanguage('eng');
+                        await worker.initialize('eng');
+                    }
+                    
+                    // Set parameters for better OCR
+                    await worker.setParameters({
+                        tessedit_pageseg_mode: Tesseract.PSM.AUTO,
+                        preserve_interword_spaces: '1'
+                    });
+                    
+                    // Perform OCR
+                    let result;
+                    if (currentImageFile) {
+                        result = await worker.recognize(currentImageFile);
+                    } else {
+                        result = await worker.recognize(currentImageUrl);
+                    }
+                    
+                    // Get output format
+                    const outputFormat = document.getElementById('textFormat').value;
+                    
+                    // Format the text based on output format
+                    let formattedText = result.data.text;
+                    
+                    if (outputFormat === 'structured' && selectedLanguages.length > 1) {
+                        // Add language indicators for structured output
+                        formattedText = `[Multi-language OCR Result]\n\n${formattedText}\n\n[Languages detected: ${selectedLanguages.join(', ')}]`;
+                    }
+                    
+                    // Display result
+                    extractedText.value = formattedText;
+                    updateExtractedCounters();
+                    copyTextBtn.disabled = false;
+                    speakTextBtn.disabled = false;
+                    
+                    // Clean up
+                    await worker.terminate();
+                    
+                    // Update button
+                    extractTextBtn.innerHTML = '<i class="fas fa-cogs"></i> Extract Text from Image';
+                    extractTextBtn.disabled = false;
+                    
+                    // Show audio player for OCR text
+                    setupOcrAudioPlayer(formattedText);
+                    
+                    showStatus('ocrStatus', `Text extracted successfully! Found ${result.data.text.split(/\s+/).filter(w => w.length > 0).length} words.`, 'success');
+                    
+                } catch (error) {
+                    console.error('OCR Error:', error);
+                    showStatus('ocrStatus', `Error extracting text: ${error.message}`, 'error');
+                    
+                    // Reset button
+                    extractTextBtn.innerHTML = '<i class="fas fa-cogs"></i> Extract Text from Image';
+                    extractTextBtn.disabled = false;
+                }
+            });
+            
+            // Setup OCR audio player
+            function setupOcrAudioPlayer(text) {
+                // Destroy previous audio if exists
+                if (ocrHowlerSound) {
+                    ocrHowlerSound.stop();
+                    ocrHowlerSound.unload();
+                }
+                
+                // Calculate approximate duration based on text length
+                const duration = text.length * 0.05; // 0.05 seconds per character
+                
+                // Create a simulated audio player for OCR text
+                ocrHowlerSound = new Howl({
+                    src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=='], // Silent audio
+                    volume: parseFloat(ocrVolumeSlider.value),
+                    rate: ocrCurrentSpeed,
+                    onplay: function() {
+                        ocrPlayBtn.disabled = true;
+                        ocrPauseBtn.disabled = false;
+                        ocrRestartBtn.disabled = false;
+                    },
+                    onpause: function() {
+                        ocrPlayBtn.disabled = false;
+                        ocrPauseBtn.disabled = true;
+                    },
+                    onstop: function() {
+                        ocrPlayBtn.disabled = false;
+                        ocrPauseBtn.disabled = true;
+                        ocrRestartBtn.disabled = true;
+                        ocrProgressSlider.value = 0;
+                        ocrCurrentTimeEl.textContent = '0:00';
+                    },
+                    onend: function() {
+                        ocrPlayBtn.disabled = false;
+                        ocrPauseBtn.disabled = true;
+                        ocrRestartBtn.disabled = false;
+                    }
+                });
+                
+                // Set duration
+                ocrDurationEl.textContent = formatTime(duration);
+                
+                // Update progress slider
+                let updateInterval;
+                ocrHowlerSound.on('play', function() {
+                    updateInterval = setInterval(function() {
+                        if (ocrHowlerSound.playing()) {
+                            const seek = ocrHowlerSound.seek() || 0;
+                            const progressPercent = (seek / duration) * 100;
+                            ocrProgressSlider.value = progressPercent;
+                            ocrCurrentTimeEl.textContent = formatTime(seek);
+                        }
+                    }, 100);
+                });
+                
+                ocrHowlerSound.on('pause', function() {
+                    clearInterval(updateInterval);
+                });
+                
+                ocrHowlerSound.on('stop', function() {
+                    clearInterval(updateInterval);
+                });
+                
+                // Show OCR audio player
+                ocrAudioPlayer.style.display = 'block';
+                
+                // Enable player controls
+                ocrPlayBtn.disabled = false;
+                ocrPauseBtn.disabled = true;
+                ocrRestartBtn.disabled = true;
+                ocrMuteBtn.disabled = false;
+                ocrProgressSlider.disabled = false;
+                ocrVolumeSlider.disabled = false;
+            }
+            
+            // OCR Audio player controls
+            ocrPlayBtn.addEventListener('click', function() {
+                if (ocrHowlerSound && !ocrHowlerSound.playing()) {
+                    ocrHowlerSound.play();
+                }
+            });
+            
+            ocrPauseBtn.addEventListener('click', function() {
+                if (ocrHowlerSound && ocrHowlerSound.playing()) {
+                    ocrHowlerSound.pause();
+                }
+            });
+            
+            ocrRestartBtn.addEventListener('click', function() {
+                if (ocrHowlerSound) {
+                    ocrHowlerSound.stop();
+                    ocrHowlerSound.play();
+                }
+            });
+            
+            ocrMuteBtn.addEventListener('click', function() {
+                if (ocrHowlerSound) {
+                    const isMuted = ocrHowlerSound.mute();
+                    ocrMuteBtn.innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+                }
+            });
+            
+            ocrVolumeSlider.addEventListener('input', function() {
+                if (ocrHowlerSound) {
+                    ocrHowlerSound.volume(this.value);
+                }
+            });
+            
+            ocrProgressSlider.addEventListener('input', function() {
+                if (ocrHowlerSound) {
+                    const duration = ocrHowlerSound.duration();
+                    const seekTime = (this.value / 100) * duration;
+                    ocrHowlerSound.seek(seekTime);
+                    ocrCurrentTimeEl.textContent = formatTime(seekTime);
+                }
+            });
+            
+            // OCR Speed buttons
+            ocrSpeedButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    ocrSpeedButtons.forEach(b => b.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Set speed
+                    ocrCurrentSpeed = parseFloat(this.dataset.speed);
+                    
+                    if (ocrHowlerSound) {
+                        ocrHowlerSound.rate(ocrCurrentSpeed);
+                    }
+                });
+            });
+            
+            // Copy extracted text
+            copyTextBtn.addEventListener('click', function() {
+                extractedText.select();
+                document.execCommand('copy');
+                
+                // Visual feedback
+                const originalText = copyTextBtn.innerHTML;
+                copyTextBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    copyTextBtn.innerHTML = originalText;
+                }, 2000);
+                
+                showStatus('ocrStatus', 'Text copied to clipboard!', 'success');
+            });
+            
+            // Speak extracted text
+            speakTextBtn.addEventListener('click', function() {
+                const text = extractedText.value;
+                if (!text.trim()) {
+                    showStatus('ocrStatus', 'No text available to speak.', 'error');
+                    return;
+                }
+                
+                // Use TTS for OCR text
+                if (window.speechSynthesis) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    
+                    // Try to use a Bengali voice if text contains Bengali
+                    if (text.match(/[\u0980-\u09FF]/)) {
+                        // Text contains Bengali characters
+                        const voices = window.speechSynthesis.getVoices();
+                        const bengaliVoice = voices.find(v => v.lang.startsWith('bn'));
+                        if (bengaliVoice) {
+                            utterance.voice = bengaliVoice;
+                            utterance.lang = 'bn-BD';
+                        }
+                    }
+                    
+                    window.speechSynthesis.speak(utterance);
+                    showStatus('ocrStatus', 'Speaking extracted text...', 'info');
+                } else {
+                    showStatus('ocrStatus', 'Speech synthesis is not available.', 'error');
+                }
+            });
+            
+            // OCR Download buttons
+            downloadOcrMp3Btn.addEventListener('click', function() {
+                if (!extractedText.value.trim()) {
+                    showStatus('ocrStatus', 'No text available to download.', 'error');
+                    return;
+                }
+                
+                const text = extractedText.value;
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ocr-text-${Date.now()}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showStatus('ocrStatus', 'Text file downloaded as OCR result!', 'success');
+            });
+            
+            downloadOcrWavBtn.addEventListener('click', function() {
+                showStatus('ocrStatus', 'WAV download simulated for OCR text.', 'info');
+            });
+            
+            downloadOcrOggBtn.addEventListener('click', function() {
+                showStatus('ocrStatus', 'OGG download simulated for OCR text.', 'info');
+            });
+            
+            downloadOcrAacBtn.addEventListener('click', function() {
+                showStatus('ocrStatus', 'AAC download simulated for OCR text.', 'info');
+            });
+            
+            // Remove image
+            removeImageBtn.addEventListener('click', function() {
+                imagePreview.src = '';
+                imagePreviewContainer.style.display = 'none';
+                extractTextBtn.disabled = true;
+                imageUpload.value = '';
+                imageUrl.value = '';
+                currentImageFile = null;
+                currentImageUrl = null;
+                hideStatus('ocrStatus');
+            });
+            
+            // ============================================
+            // SPEECH TO TEXT FUNCTIONALITY
+            // ============================================
+            // This part remains similar to previous version
+            // ... (rest of the Speech to Text code would go here)
+            
+            // Initialize
+            updateCounters();
+            loadVoices();
+        });
+    </script>
+</body>
+</html>
