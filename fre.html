@@ -32,6 +32,18 @@
             justify-content: center;
             align-items: flex-start;
             color: #e0e0e0;
+            overscroll-behavior: none;
+            overflow-x: hidden;
+            overflow-y: scroll; /* স্ক্রোল সক্রিয় */
+            -ms-overflow-style: none;  /* IE এবং Edge এ স্ক্রোল বার হাইড */
+            scrollbar-width: none;  /* ফায়ারফক্সে স্ক্রোল বার হাইড */
+            width: 100%;
+            position: relative;
+        }
+        
+        /* ক্রোম, সাফারি, অপেরাতে স্ক্রোল বার হাইড */
+        ::-webkit-scrollbar {
+            display: none;
         }
 
         /* main glass card — dark with blur */
@@ -45,9 +57,10 @@
             border-radius: 10px;
             box-shadow: 0 20px 40px -8px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset;
             padding: 26px 22px;
+            overflow-x: hidden;
         }
 
-        /* logo area — full size but reduced via scale 4%? actually we use max-width 100% and scale if needed */
+        /* logo area */
         .logo-header {
             display: flex;
             align-items: center;
@@ -59,7 +72,7 @@
             height: 100px;
             max-width: 100%;
             object-fit: contain;
-            transform: scale(0.96); /* 4% reduction as requested */
+            transform: scale(0.96);
             transform-origin: left center;
         }
         .powered-badge {
@@ -112,6 +125,7 @@
             transition: 0.2s;
             padding: 4px 4px 4px 22px;
             box-shadow: 0 6px 12px -4px #030608;
+            flex-wrap: wrap;
         }
         .url-box:focus-within {
             border-color: #5f9ea0;
@@ -131,6 +145,7 @@
             background: transparent;
             font-weight: 500;
             color: #f0f6ff;
+            min-width: 200px;
         }
         .url-box input::placeholder {
             color: #6a819b;
@@ -150,6 +165,7 @@
         .action-group {
             display: flex;
             gap: 6px;
+            flex-wrap: wrap;
         }
         .url-box .action-btn {
             background: #1f4b6e;
@@ -255,16 +271,17 @@
             transform: translateY(-2px);
         }
 
-        /* channels grid (scrollbar hidden) */
+        /* channels grid (scrollbar hidden but scrollable) */
         .channels-grid {
             background: #0f1922;
             border-radius: 5px;
             padding: 18px 8px;
             max-height: 50vh;
-            overflow-y: auto;
+            overflow-y: scroll; /* স্ক্রোল সক্রিয় */
             border: 1px solid #2e4053;
             scrollbar-width: none;  /* Firefox hide */
             -ms-overflow-style: none; /* IE hide */
+            -webkit-overflow-scrolling: touch;
         }
         .channels-grid::-webkit-scrollbar {
             display: none;  /* Chrome/Safari hide */
@@ -278,6 +295,7 @@
             border-radius: 10px;
             border: 1px solid #3a5068;
             box-shadow: 0 2px 8px #010101;
+            flex-wrap: wrap;
         }
         .channel-row:hover {
             background: #233447;
@@ -339,7 +357,7 @@
         }
         .led.green { background: #2ecc71; box-shadow: 0 0 12px #27ae60; }
         .led.red { background: #e74c3c; box-shadow: 0 0 12px #c0392b; }
-        .led.yellow { background: #f39c12; box-shadow: 0 0 10px #e67e22; } /* checking state */
+        .led.yellow { background: #f39c12; box-shadow: 0 0 10px #e67e22; }
         .led.gray { background: #7f8c8d; box-shadow: none; }
 
         .copy-btn, .play-btn {
@@ -385,6 +403,7 @@
             justify-content: center;
             z-index: 999;
             transition: 0.2s;
+            overscroll-behavior: none;
         }
         .player-card {
             width: 90%;
@@ -414,12 +433,15 @@
             box-shadow: 0 4px 8px black;
         }
         #player {
-            width: 100%;
+            width: 65%;  /* আরও ছোট করা হয়েছে (আগে 80% ছিল) */
+            height: auto;
             aspect-ratio: 16 / 9;
             background: black;
             border-radius: 10px;
             overflow: hidden;
             border: 2px solid #3a6783;
+            margin: 0 auto;  /* সেন্টার */
+            display: block;
         }
         .player-url-bar {
             margin-top: 18px;
@@ -456,9 +478,37 @@
         /* responsive */
         @media (max-width: 600px) {
             .dark-card { padding: 18px 12px; }
-            .channel-row { flex-wrap: wrap; padding: 12px; }
-            .status-led { margin-left: auto; }
-            .player-card { padding: 16px; }
+            .channel-row { 
+                flex-wrap: wrap; 
+                padding: 12px;
+                gap: 8px;
+            }
+            .status-led { 
+                margin-left: 0;
+                order: 1;
+            }
+            .copy-btn, .play-btn {
+                margin-left: 0;
+                margin-right: 6px;
+            }
+            .url-box {
+                padding: 4px;
+            }
+            .url-box input {
+                min-width: 100%;
+                padding: 12px 6px;
+            }
+            .action-group {
+                width: 100%;
+                justify-content: flex-end;
+                margin-top: 4px;
+            }
+            .player-card {
+                padding: 16px;
+            }
+            #player {
+                width: 75%; /* মোবাইলে একটু বড় */
+            }
         }
     </style>
 </head>
@@ -514,7 +564,7 @@
 <div id="playerOverlay" class="player-overlay">
     <div class="player-card">
         <button class="close-player" id="closePlayerBtn"><i class="fas fa-times"></i></button>
-        <div id="player" style="width:100%; height:auto;"></div>
+        <div id="player" style="width:90%; height:auto;"></div>
         <div class="player-url-bar">
             <input type="text" id="playerUrlInput" placeholder="Stream URL (editable)" value="">
             <button id="loadPlayerBtn"><i class="fas fa-play"></i> Load/Play</button>
