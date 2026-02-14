@@ -3,21 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Playlist Status Checker · Sirome TV</title>
-    <!-- Favicon & Open Graph -->
+    <title>Sirome TV · Playlist Status Checker</title>
+    <!-- Favicon & OG image -->
     <link rel="icon" href="https://i.postimg.cc/d1hHy4ss/11.png" type="image/png">
     <meta property="og:image" content="https://i.postimg.cc/d1hHy4ss/11.png">
-    <!-- Font Awesome 6 (free) -->
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts: Inter + Sansita One for footer -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sansita+One&display=swap" rel="stylesheet">
-    <!-- Clappr Core & Plugins -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Sansita+One&display=swap" rel="stylesheet">
+    <!-- Clappr & plugins -->
     <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/level-selector@0.2.0/dist/level-selector.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@clappr/hlsjs-playback@1.0.1/dist/hlsjs-playback.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/clappr-pip-mode@1.1.0/dist/clappr-pip-mode.min.js"></script>
-    <!-- HLS.js for better HLS support -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         * {
             margin: 0;
@@ -26,275 +24,303 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: #0a0c0f;
-            color: #e5e9f0;
+            background: #0b0f14;
             min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            padding: 16px 12px;
             display: flex;
-            flex-direction: column;
-            padding: 16px;
-            transition: all 0.2s;
-            overflow: hidden;
+            justify-content: center;
+            align-items: flex-start;
+            color: #e0e0e0;
         }
 
-        .glass-card {
-            max-width: 1400px;
+        /* main glass card — dark with blur */
+        .dark-card {
+            max-width: 1300px;
             width: 100%;
-            margin: 0 auto;
-            background: rgba(18, 22, 28, 0.92);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid #2e3a48;
-            border-radius: 36px;
-            padding: 24px 22px;
-            box-shadow: 0 25px 45px -12px #00000080;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            background: rgba(20, 28, 36, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(80, 140, 200, 0.15);
+            border-radius: 10px;
+            box-shadow: 0 20px 40px -8px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset;
+            padding: 26px 22px;
         }
 
-        h1 {
+        /* logo area — full size but reduced via scale 4%? actually we use max-width 100% and scale if needed */
+        .logo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .logo-img {
+            height: 100px;
+            max-width: 100%;
+            object-fit: contain;
+            transform: scale(0.96); /* 4% reduction as requested */
+            transform-origin: left center;
+        }
+        .powered-badge {
+            font-family: 'Sansita One', cursive;
+            color: #7cb9e8;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            background: rgba(0,0,0,0.3);
+            padding: 6px 16px;
+            border-radius: 10px;
+            border: 1px solid #3e5a77;
+        }
+
+        h2 {
             font-size: 1.9rem;
             font-weight: 600;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 12px;
-            color: #f0f6fc;
-            margin-bottom: 6px;
-            text-align: center;
+            color: #c9e2ff;
+            margin: 12px 0 8px;
         }
-        h1 i {
-            color: #3ecf8e;
+        h2 i {
+            color: #3cb371;
+            font-size: 2rem;
         }
         .sub {
-            color: #9ab8d9;
-            margin-bottom: 24px;
+            color: #a0bfdd;
+            margin-bottom: 28px;
             font-weight: 500;
-            border-left: 4px solid #3ecf8e;
+            border-left: 4px solid #3cb371;
             padding-left: 18px;
-            font-size: 0.95rem;
-            text-align: left;
+            background: rgba(60, 179, 113, 0.05);
+            border-radius: 0 20px 20px 0;
         }
 
+        /* input section */
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
         .url-box {
             display: flex;
             align-items: center;
-            background: #1e2630;
-            border-radius: 60px;
-            border: 1px solid #384754;
-            padding: 4px 4px 4px 24px;
-            margin-bottom: 20px;
-            flex: 1;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #38536b;
+            transition: 0.2s;
+            padding: 4px 4px 4px 22px;
+            box-shadow: 0 6px 12px -4px #030608;
+        }
+        .url-box:focus-within {
+            border-color: #5f9ea0;
+            box-shadow: 0 0 0 2px #2d5f6e;
         }
         .url-box i.fa-link {
-            color: #79b8ff;
-            margin-right: 10px;
+            color: #6c9ac3;
+            font-size: 1.2rem;
+            margin-right: 8px;
         }
         .url-box input {
             flex: 1;
-            background: transparent;
             border: none;
-            color: #f0f6fc;
-            font-size: 1rem;
-            padding: 16px 0;
             outline: none;
+            font-size: 1rem;
+            padding: 16px 6px 16px 0;
+            background: transparent;
+            font-weight: 500;
+            color: #f0f6ff;
         }
         .url-box input::placeholder {
-            color: #6f859c;
+            color: #6a819b;
         }
-        .clear-btn {
+        .url-box .clear-btn {
             background: transparent;
             border: none;
-            color: #a2bcdb;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
+            color: #809bb5;
             cursor: pointer;
-            padding: 0 12px;
+            padding: 0 12px 0 6px;
+            transition: 0.15s;
+        }
+        .url-box .clear-btn:hover {
+            color: #ffa07a;
+        }
+        .action-group {
             display: flex;
-            align-items: center;
+            gap: 6px;
         }
-        .clear-btn:hover {
-            color: #f98f8f;
-        }
-        .action-btn {
-            background: #2f3e52;
+        .url-box .action-btn {
+            background: #1f4b6e;
             border: none;
             color: white;
             font-weight: 600;
-            padding: 12px 20px;
-            border-radius: 40px;
+            padding: 12px 22px;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
-            cursor: pointer;
             transition: 0.15s;
             white-space: nowrap;
-            border: 1px solid #4f637b;
-            margin-left: 5px;
+            border: 1px solid #6396b9;
         }
-        .action-btn.reset-btn {
-            background: #442f2f;
-            border-color: #8b4e4e;
+        .url-box .action-btn.reset-btn {
+            background: #3a2c2c;
+            border-color: #a15a5a;
         }
-        .action-btn:hover {
-            filter: brightness(1.2);
-        }
-
         .drag-area {
-            border: 2px dashed #3d5068;
-            border-radius: 36px;
-            background: #151e26;
+            border: 2px dashed #446688;
+            border-radius: 10px;
+            background: #111c26;
             padding: 26px 20px;
             text-align: center;
             transition: 0.2s;
             cursor: pointer;
-            margin-bottom: 20px;
         }
         .drag-area.active {
-            border-color: #3ecf8e;
-            background: #1e2f2a;
+            border-color: #3cb371;
+            background: #1c3329;
         }
         .drag-area i {
-            font-size: 2.8rem;
-            color: #6d8eb0;
+            font-size: 2.6rem;
+            color: #5d86a8;
         }
         .drag-text {
             font-weight: 600;
             font-size: 1.2rem;
-            color: #ccddec;
-        }
-        .drag-area span {
-            color: #8aa2c0;
-        }
-        .hidden-file-input {
-            display: none;
+            color: #bdd4ec;
+            margin: 6px 0 4px;
         }
 
+        .hidden-file-input { display: none; }
+
+        /* status bar */
         .status-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            margin: 18px 0 16px;
             flex-wrap: wrap;
-            gap: 15px;
-            margin: 20px 0 18px;
+            gap: 12px;
         }
         .stats {
-            background: #1c2632;
-            border-radius: 40px;
-            padding: 12px 26px;
+            background: #17212b;
+            border-radius: 5px;
+            padding: 12px 24px;
             font-weight: 600;
-            color: #ceddec;
-            border: 1px solid #35475a;
-            font-size: 0.95rem;
+            border: 1px solid #3f5568;
+            color: #bcd3f0;
         }
-        .stats i {
-            color: #3ecf8e;
-            margin-right: 6px;
-        }
+        .stats i { color: #3cb371; margin-right: 6px; }
+
         .selection-tools {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
         .btn {
-            background: #262f3c;
-            border: 1px solid #41566e;
+            background: #253544;
+            border: none;
             padding: 10px 22px;
-            border-radius: 40px;
+            border-radius: 5px;
             font-weight: 600;
             font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            color: #d4e2f5;
             transition: 0.1s;
+            border: 1px solid #4b637b;
+            color: #ddeeff;
         }
+        .btn i { color: #9fc9f0; }
         .btn-primary {
-            background: #1f3d58;
-            border-color: #3880b0;
-            color: white;
+            background: #1a4b62;
+            border-color: #3987b0;
         }
         .btn-success {
-            background: #1c5537;
-            border-color: #3ecf8e;
-            color: white;
+            background: #1d6e47;
+            border-color: #46b574;
         }
         .btn-outline {
             background: transparent;
-            border: 1.5px solid #50799e;
+            border: 1.5px solid #557c9f;
+            color: #cce1ff;
         }
         .btn:hover {
-            filter: brightness(1.2);
+            background: #2d4258;
             transform: translateY(-2px);
         }
 
+        /* channels grid (scrollbar hidden) */
         .channels-grid {
-            background: #11181f;
-            border-radius: 32px;
-            padding: 16px 10px;
-            max-height: 45vh;
+            background: #0f1922;
+            border-radius: 5px;
+            padding: 18px 8px;
+            max-height: 50vh;
             overflow-y: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            border: 1px solid #26323f;
-            margin-bottom: 16px;
+            border: 1px solid #2e4053;
+            scrollbar-width: none;  /* Firefox hide */
+            -ms-overflow-style: none; /* IE hide */
         }
         .channels-grid::-webkit-scrollbar {
-            display: none;
+            display: none;  /* Chrome/Safari hide */
         }
-
         .channel-row {
             display: flex;
             align-items: center;
-            background: #1c2733;
-            margin: 10px 4px;
-            padding: 8px 16px 8px 20px;
-            border-radius: 50px;
-            border: 1px solid #31475c;
-            flex-wrap: wrap;
-            gap: 10px;
+            background: #1c2938;
+            margin: 10px 6px;
+            padding: 8px 16px 8px 16px;
+            border-radius: 10px;
+            border: 1px solid #3a5068;
+            box-shadow: 0 2px 8px #010101;
         }
         .channel-row:hover {
-            background: #23303e;
-            border-color: #4e799b;
+            background: #233447;
+            border-color: #5f8ab6;
         }
         .channel-select {
-            margin-right: 8px;
+            margin-right: 12px;
         }
         .channel-select input {
-            width: 18px;
-            height: 18px;
-            accent-color: #3ecf8e;
+            width: 20px;
+            height: 20px;
+            accent-color: #2e8b57;
         }
         .channel-logo {
-            width: 75px;
-            height: 75px; /* 75*75 as requested - square logo */
-            border-radius: 7%;
-            background: #233344;
+            width: 60px;
+            height: 40px;
+            border-radius: 5px;
+            background: #1b3346;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
-            object-fit: cover; /* This ensures the image covers the entire area */
-            border: 2px solid #4f6a83;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #bbd9ff;
             margin-right: 14px;
+            object-fit: fit;
+            border: 2px solid #446688;
         }
         .channel-info {
-            flex: 2;
-            min-width: 160px;
+            flex: 1;
+            min-width: 0;
         }
         .channel-name {
             font-weight: 700;
             font-size: 1rem;
-            color: #eef5ff;
+            color: #d6eaff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .channel-url-preview {
             font-size: 0.7rem;
-            color: #99b5d3;
-            max-width: 280px;
+            color: #8ea9c4;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -302,618 +328,478 @@
         .status-led {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin: 0 6px;
+            gap: 16px;
+            margin: 0 8px;
         }
         .led {
-            width: 20px;
-            height: 20px;
+            min-width: 18px;
+            height: 18px;
             border-radius: 50%;
-            box-shadow: 0 0 10px;
+            box-shadow: 0 0 8px;
         }
-        .led.green { background: #2ecc71; box-shadow: 0 0 12px #2ecc71; }
-        .led.red { background: #e74c3c; box-shadow: 0 0 12px #e74c3c; }
-        .led.yellow { background: #f39c12; box-shadow: 0 0 12px #f39c12; }
-        .led.gray { background: #546979; box-shadow: none; }
+        .led.green { background: #2ecc71; box-shadow: 0 0 12px #27ae60; }
+        .led.red { background: #e74c3c; box-shadow: 0 0 12px #c0392b; }
+        .led.yellow { background: #f39c12; box-shadow: 0 0 10px #e67e22; } /* checking state */
+        .led.gray { background: #7f8c8d; box-shadow: none; }
 
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            margin-left: auto;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
         .copy-btn, .play-btn {
-            background: #263a4a;
-            border: 1px solid #426280;
+            background: #1e3347;
+            border: none;
+            border-radius: 10px;
             padding: 8px 14px;
-            border-radius: 32px;
             font-weight: 600;
             font-size: 0.8rem;
-            color: #d5e9ff;
+            color: #c9e2ff;
             display: inline-flex;
             align-items: center;
             gap: 6px;
             cursor: pointer;
+            border: 1px solid #41617b;
+            margin-left: 6px;
         }
         .play-btn {
-            background: #1b4b3b;
-            border-color: #3ecf8e;
-            color: white;
+            background: #1f5d3c;
+            border-color: #52b46c;
         }
-        .copy-btn:hover { background: #2f4a62; }
-        .play-btn:hover { background: #246b4f; }
+        .copy-btn i, .play-btn i { font-size: 0.9rem; }
 
-        .modal-overlay {
+        /* footer */
+        .footer {
+            text-align: center;
+            padding: 16px 10px 6px;
+            margin-top: 20px;
+            color: #ddd;
+            font-family: 'Sansita One', sans-serif;
+            border-top: 1px solid #2c4053;
+        }
+
+        /* Popup player overlay */
+        .player-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(0,0,0,0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            transition: 0.2s;
+        }
+        .player-card {
+            width: 90%;
+            max-width: 950px;
+            background: #0f1a24;
+            border-radius: 10px;
+            padding: 22px 22px 28px;
+            border: 1px solid #4c779b;
+            box-shadow: 0 30px 50px #00000080;
+            position: relative;
+        }
+        .close-player {
+            position: absolute;
+            top: 12px; right: 20px;
+            background: #922020;
+            color: white;
+            border: none;
+            font-size: 28px;
+            width: 28px; height: 28px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            padding: 15px;
-            visibility: hidden;
-            opacity: 0;
-            transition: 0.2s ease;
-        }
-        .modal-overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
-        .modal-content {
-            background: #0f1a24;
-            width: 100%;
-            max-width: 900px;
-            border-radius: 36px;
-            border: 1px solid #3b5d7a;
-            box-shadow: 0 30px 50px #00000080;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            margin: 0 auto;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .modal-header h3 {
-            color: #b5d9ff;
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-        .close-modal {
-            background: transparent;
-            border: none;
-            color: #c0d8f0;
-            font-size: 2rem;
             cursor: pointer;
-            line-height: 1;
-            padding: 0 8px;
-        }
-        .close-modal:hover {
-            color: #f19595;
+            z-index: 1000;
+            border: 1px solid #c66;
+            box-shadow: 0 4px 8px black;
         }
         #player {
             width: 100%;
-            height: 0;
-            padding-bottom: 45%;
+            aspect-ratio: 16 / 9;
             background: black;
-            border-radius: 24px;
+            border-radius: 10px;
             overflow: hidden;
-            border: 2px solid #2d506d;
+            border: 2px solid #3a6783;
         }
-        .player-url-row {
+        .player-url-bar {
+            margin-top: 18px;
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 12px;
             align-items: center;
             flex-wrap: wrap;
         }
-        .player-url-row input {
+        .player-url-bar input {
             flex: 1;
-            background: #1b2a38;
-            border: 1px solid #3b6180;
-            border-radius: 40px;
-            padding: 14px 20px;
+            padding: 16px 20px;
+            border-radius: 10px;
+            border: none;
+            background: #1d2f3f;
             color: white;
             font-size: 0.95rem;
-            outline: none;
-            min-width: 180px;
+            border: 1px solid #3f6f97;
+            min-width: 200px;
         }
-        .player-url-row button {
-            background: #2f4e72;
+        .player-url-bar button {
+            background: #1f6e4a;
             border: none;
-            padding: 14px 24px;
-            border-radius: 40px;
+            padding: 16px 32px;
+            border-radius: 10px;
             font-weight: 700;
             color: white;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             cursor: pointer;
-            white-space: nowrap;
-        }
-        .player-url-row button:hover {
-            background: #3e628a;
+            border: 1px solid #6abf8c;
         }
 
-        .footer {
-            text-align: center;
-            padding: 14px 10px;
-            background-color: #0c0f13;
-            margin-top: 15px;
-            color: #fff;
-            font-family: 'Sansita One', sans-serif;
-            border-radius: 60px;
-            border: 1px solid #29394a;
-            width: 100%;
-        }
-
+        /* responsive */
         @media (max-width: 600px) {
-            .channel-row {
-                flex-direction: column;
-                align-items: flex-start;
-                border-radius: 30px;
-            }
-            .action-buttons {
-                margin-left: 0;
-                width: 100%;
-                justify-content: flex-start;
-            }
-            .status-led {
-                margin-left: 0;
-            }
-            .glass-card {
-                padding: 18px;
-            }
-            #player {
-                padding-bottom: 56%;
-            }
-        }
-        @media (max-height: 500px) and (orientation: landscape) {
-            .modal-content {
-                max-width: 80%;
-            }
-            #player {
-                padding-bottom: 40%;
-            }
+            .dark-card { padding: 18px 12px; }
+            .channel-row { flex-wrap: wrap; padding: 12px; }
+            .status-led { margin-left: auto; }
+            .player-card { padding: 16px; }
         }
     </style>
 </head>
 <body>
-    <div class="glass-card">
-        <h1><i class="fas fa-list-check"></i> Playlist Status Checker</h1>
-        <div class="sub">Drag/paste or upload file – Green LED = playable (200 OK / m3u8, mp4, ts, mpd)</div>
+<div class="dark-card">
+    <!-- logo row -->
+    <div class="logo-header">
+        <img src="https://i.postimg.cc/d1hHy4ss/11.png" alt="Sirome TV" class="logo-img" onerror="this.src='https://via.placeholder.com/150x60?text=Sirome+TV'">
+        <span class="powered-badge"><i class="fas fa-check-circle" style="color:#3cb371;"></i> verifier</span>
+    </div>
 
-        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-            <div class="url-box" style="margin-bottom: 0; flex: 1;">
-                <i class="fas fa-link"></i>
-                <input type="url" id="playlistUrl" placeholder="https://example.com/playlist.m3u or .txt">
-                <button class="clear-btn" id="clearInputBtn"><i class="fas fa-times-circle"></i></button>
+    <h2><i class="fas fa-play-circle"></i> Playlist Status Checker</h2>
+    <div class="sub">Drag/paste or upload file – green LED = playable (200 OK / m3u8, mp4, ts, mpd)</div>
+
+    <div class="input-section">
+        <div class="url-box">
+            <i class="fas fa-link"></i>
+            <input type="url" id="playlistUrl" placeholder="https://example.com/playlist.m3u or paste here" value="">
+            <button class="clear-btn" id="clearInputBtn"><i class="fas fa-times-circle"></i></button>
+            <div class="action-group">
                 <button class="action-btn" id="loadUrlBtn"><i class="fas fa-cloud-download-alt"></i> Load</button>
+                <button class="action-btn reset-btn" id="resetAllBtn"><i class="fas fa-undo-alt"></i> Reset</button>
             </div>
-            <button class="action-btn reset-btn" id="resetAllBtn"><i class="fas fa-undo-alt"></i> Reset</button>
         </div>
-
         <div class="drag-area" id="dragArea">
             <i class="fas fa-cloud-upload-alt"></i>
             <div class="drag-text">Drop file or click here</div>
-            <span>Supports .m3u, .m3u8, .txt (M3U format)</span>
+            <span>supports .m3u, .m3u8, .txt (M3U format)</span>
             <input type="file" id="fileInput" accept=".m3u,.m3u8,.txt,audio/x-mpegurl" class="hidden-file-input">
         </div>
+    </div>
 
-        <div class="status-bar">
-            <div class="stats"><i class="fas fa-list-ul"></i> <span id="totalCount">0</span> channels · <span id="greenCount">0</span> green · <span id="redCount">0</span> red</div>
-            <div class="selection-tools">
-                <button class="btn btn-outline" id="selectAllGreen"><i class="fas fa-check-double"></i> Select all green</button>
-                <button class="btn btn-outline" id="deselectAll"><i class="fas fa-times"></i> Deselect all</button>
-                <button class="btn btn-success" id="downloadSelected"><i class="fas fa-file-download"></i> Download selected M3U</button>
-            </div>
-        </div>
-
-        <div class="channels-grid" id="channelsContainer">
-            <div style="padding: 40px; text-align: center; color: #859eb9;"><i class="fas fa-music"></i> Paste URL or drop file</div>
-        </div>
-
-        <div class="footer">
-            <p>Powered by Sirome TV 2022 - 2026</p>
+    <div class="status-bar">
+        <div class="stats"><i class="fas fa-list-ul"></i> <span id="totalCount">0</span> channels · <span id="greenCount">0</span> green · <span id="redCount">0</span> red</div>
+        <div class="selection-tools">
+            <button class="btn btn-outline" id="selectAllGreen"><i class="fas fa-check-double"></i> select all green</button>
+            <button class="btn btn-outline" id="deselectAll"><i class="fas fa-times"></i> deselect all</button>
+            <button class="btn btn-success" id="downloadSelected"><i class="fas fa-file-download"></i> Download selected M3U</button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="videoModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-play-circle" style="color:#3ecf8e;"></i> Now Playing</h3>
-                <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="player"></div>
-            <div class="player-url-row">
-                <input type="text" id="playerStreamUrl" placeholder="Enter or paste stream URL ..." value="">
-                <button id="loadStreamBtn"><i class="fas fa-sync-alt"></i> Load / Play</button>
-            </div>
-        </div>
+    <div class="channels-grid" id="channelsContainer">
+        <div style="padding: 40px; text-align: center; color:#8aa9c9;"><i class="fas fa-arrow-up"></i> enter playlist link or drop file</div>
     </div>
 
-    <script>
-        (function() {
-            let channels = [];
-            let checkStatusMap = new Map();
-            let abortControllers = new Map();
+    <!-- footer -->
+    <div class="footer">
+        <p>Powered by Sirome TV 2022 - 2026</p>
+    </div>
+</div>
 
-            const urlInput = document.getElementById('playlistUrl');
-            const clearBtn = document.getElementById('clearInputBtn');
-            const loadUrlBtn = document.getElementById('loadUrlBtn');
-            const resetAllBtn = document.getElementById('resetAllBtn');
-            const dragArea = document.getElementById('dragArea');
-            const fileInput = document.getElementById('fileInput');
-            const channelsContainer = document.getElementById('channelsContainer');
-            const totalSpan = document.getElementById('totalCount');
-            const greenSpan = document.getElementById('greenCount');
-            const redSpan = document.getElementById('redCount');
-            const selectAllGreenBtn = document.getElementById('selectAllGreen');
-            const deselectAllBtn = document.getElementById('deselectAll');
-            const downloadBtn = document.getElementById('downloadSelected');
+<!-- hidden player overlay -->
+<div id="playerOverlay" class="player-overlay">
+    <div class="player-card">
+        <button class="close-player" id="closePlayerBtn"><i class="fas fa-times"></i></button>
+        <div id="player" style="width:100%; height:auto;"></div>
+        <div class="player-url-bar">
+            <input type="text" id="playerUrlInput" placeholder="Stream URL (editable)" value="">
+            <button id="loadPlayerBtn"><i class="fas fa-play"></i> Load/Play</button>
+        </div>
+    </div>
+</div>
 
-            const modalOverlay = document.getElementById('videoModal');
-            const closeModalBtn = document.getElementById('closeModalBtn');
-            const playerStreamUrl = document.getElementById('playerStreamUrl');
-            const loadStreamBtn = document.getElementById('loadStreamBtn');
-            let clapprPlayer = null;
+<script>
+    (function() {
+        // ---------- state ----------
+        let channels = [];              
+        let checkStatusMap = new Map();  // url -> true(ok)/false/failed/'checking'
+        let abortControllers = new Map();
 
-            function closeModal() {
-                modalOverlay.classList.remove('active');
-                if (clapprPlayer) {
-                    clapprPlayer.destroy();
-                    clapprPlayer = null;
+        // DOM
+        const urlInput = document.getElementById('playlistUrl');
+        const clearBtn = document.getElementById('clearInputBtn');
+        const loadUrlBtn = document.getElementById('loadUrlBtn');
+        const resetAllBtn = document.getElementById('resetAllBtn');
+        const dragArea = document.getElementById('dragArea');
+        const fileInput = document.getElementById('fileInput');
+        const channelsContainer = document.getElementById('channelsContainer');
+        const totalSpan = document.getElementById('totalCount');
+        const greenSpan = document.getElementById('greenCount');
+        const redSpan = document.getElementById('redCount') || { innerText: '0' }; // create if missing
+        const selectAllGreenBtn = document.getElementById('selectAllGreen');
+        const deselectAllBtn = document.getElementById('deselectAll');
+        const downloadBtn = document.getElementById('downloadSelected');
+
+        // player overlay
+        const overlay = document.getElementById('playerOverlay');
+        const closePlayerBtn = document.getElementById('closePlayerBtn');
+        const playerUrlInput = document.getElementById('playerUrlInput');
+        const loadPlayerBtn = document.getElementById('loadPlayerBtn');
+        let clapprPlayer = null;
+
+        // ensure red span exists
+        if (!document.getElementById('redCount')) {
+            const statsDiv = document.querySelector('.stats');
+            const redSpan = document.createElement('span');
+            redSpan.id = 'redCount';
+            redSpan.innerText = '0';
+            statsDiv.innerHTML += ' · <span id="redCount">0</span> red';
+        }
+
+        // --- helper: parse M3U ---
+        function parseM3U(content) {
+            const lines = content.split(/\r?\n/);
+            const channels = [];
+            let currentName = 'Unnamed';
+            let currentLogo = '';
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (line.startsWith('#EXTINF:')) {
+                    const logoMatch = line.match(/tvg-logo="([^"]*)"/i);
+                    currentLogo = logoMatch ? logoMatch[1] : '';
+                    const nameMatch = line.match(/,(.+)$/);
+                    currentName = nameMatch ? nameMatch[1].trim() : 'Unknown';
+                } else if (line && !line.startsWith('#')) {
+                    channels.push({
+                        name: currentName,
+                        url: line,
+                        logo: currentLogo || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentName)}&background=2b5a7a&color=fff&size=44&length=1&bold=true`,
+                    });
+                    currentName = 'Unnamed'; currentLogo = '';
                 }
             }
+            return channels;
+        }
 
-            function openPlayerWithUrl(streamUrl, logo = '') {
-                playerStreamUrl.value = streamUrl;
-                modalOverlay.classList.add('active');
-
-                if (clapprPlayer) {
-                    clapprPlayer.destroy();
-                }
-
-                try {
-                    // Enhanced Clappr configuration for better HLS support
-                    clapprPlayer = new Clappr.Player({
-                        source: streamUrl,
-                        parentId: "#player",
-                        autoPlay: true,
-                        mute: false,
-                        width: "100%",
-                        height: "100%",
-                        plugins: [
-                            HlsjsPlayback, 
-                            LevelSelector,
-                            (window.ClapprPipMode ? window.ClapprPipMode.PipButton : null)
-                        ].filter(Boolean),
-                        mediacontrol: { 
-                            seekbar: "#e74c3c", 
-                            buttons: "#ecf0f1",
-                            volume: true
-                        },
-                        poster: "https://i.postimg.cc/cJBhWxv5/3122396-icoCopy.png",
-                        hlsjsConfig: {
-                            enableWorker: true,
-                            debug: false,
-                            overrideNative: true,
-                            // Better streaming options
-                            maxBufferLength: 30,
-                            maxMaxBufferLength: 60,
-                            liveSyncDurationCount: 3,
-                            liveMaxLatencyDurationCount: 5
-                        },
-                        // Force HLS playback for m3u8 files
-                        playback: {
-                            hlsjsConfig: {
-                                enableWorker: true,
-                                overrideNative: true
-                            }
-                        }
-                    });
-                    
-                    // Add event listener for playback errors
-                    clapprPlayer.on(Clappr.Events.PLAYER_ERROR, (error) => {
-                        console.error('Player error:', error);
-                        // Try alternative method if Clappr fails
-                        if (streamUrl.includes('.m3u8')) {
-                            tryNativeHLS(streamUrl);
-                        }
-                    });
-                    
-                } catch (e) {
-                    console.error('Player initialization error:', e);
-                    // Fallback to native HLS
-                    tryNativeHLS(streamUrl);
-                }
+        // render channels + attach dynamic buttons
+        function renderChannels() {
+            if (!channels.length) {
+                channelsContainer.innerHTML = `<div style="padding:40px;text-align:center;color:#8aa9c9;"><i class="fas fa-folder-open"></i> no channels found</div>`;
+                updateStats(); return;
             }
-            
-            // Fallback function using native HLS or video element
-            function tryNativeHLS(streamUrl) {
-                const playerDiv = document.getElementById('player');
-                playerDiv.innerHTML = ''; // Clear the div
-                
-                // Create a simple video element
-                const videoElement = document.createElement('video');
-                videoElement.style.width = '100%';
-                videoElement.style.height = '100%';
-                videoElement.style.backgroundColor = '#000';
-                videoElement.controls = true;
-                videoElement.autoplay = true;
-                
-                // Check if HLS is supported natively or use HLS.js
-                if (Hls.isSupported() && streamUrl.includes('.m3u8')) {
-                    const hls = new Hls();
-                    hls.loadSource(streamUrl);
-                    hls.attachMedia(videoElement);
-                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                        videoElement.play().catch(e => console.log('Autoplay prevented:', e));
-                    });
-                } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-                    // Safari native HLS support
-                    videoElement.src = streamUrl;
-                } else {
-                    // Try direct play as fallback
-                    videoElement.src = streamUrl;
-                }
-                
-                playerDiv.appendChild(videoElement);
-            }
+            let html = '';
+            channels.forEach((ch, idx) => {
+                const status = checkStatusMap.get(ch.url);
+                let ledClass = 'led gray';
+                let title = 'not checked';
+                if (status === 'checking') { ledClass = 'led yellow'; title = 'checking...'; }
+                else if (status === true) { ledClass = 'led green'; title = 'playable (200 OK)'; }
+                else if (status === false) { ledClass = 'led red'; title = 'failed / broken'; }
 
-            loadStreamBtn.addEventListener('click', () => {
-                const newUrl = playerStreamUrl.value.trim();
-                if (!newUrl) return;
-                
-                // Clear player container and try with new URL
-                if (clapprPlayer) {
-                    clapprPlayer.destroy();
-                    clapprPlayer = null;
-                }
-                
-                const playerDiv = document.getElementById('player');
-                playerDiv.innerHTML = ''; // Clear any existing content
-                
-                openPlayerWithUrl(newUrl);
+                html += `<div class="channel-row" data-url="${ch.url}">
+                    <div class="channel-select"><input type="checkbox" class="channel-checkbox" data-url="${ch.url}" ${ch.selected ? 'checked' : ''}></div>
+                    <img class="channel-logo" src="${ch.logo}" alt="logo" loading="lazy" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(ch.name)}&background=2b5a7a&color=fff&size=44&length=1&bold=true';">
+                    <div class="channel-info">
+                        <div class="channel-name">${ch.name}</div>
+                        <div class="channel-url-preview">${ch.url.substring(0,70)}${ch.url.length>70?'…':''}</div>
+                    </div>
+                    <div class="status-led"><span class="${ledClass}" title="${title}"></span></div>
+                    <button class="copy-btn" data-url="${ch.url}"><i class="far fa-copy"></i> Copy</button>
+                    <button class="play-btn" data-url="${ch.url}"><i class="fas fa-play"></i> Play</button>
+                </div>`;
             });
+            channelsContainer.innerHTML = html;
 
-            closeModalBtn.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', (e) => {
-                if (e.target === modalOverlay) closeModal();
+            // attach copy
+            document.querySelectorAll('.copy-btn').forEach(b => b.addEventListener('click', (e) => {
+                const url = e.currentTarget.dataset.url;
+                navigator.clipboard.writeText(url).then(() => alert('URL copied'));
+            }));
+            // attach play -> open overlay
+            document.querySelectorAll('.play-btn').forEach(b => b.addEventListener('click', (e) => {
+                const url = e.currentTarget.dataset.url;
+                openPlayerWithUrl(url);
+            }));
+            // checkboxes
+            document.querySelectorAll('.channel-checkbox').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    const url = e.target.dataset.url;
+                    const ch = channels.find(c => c.url === url);
+                    if (ch) ch.selected = e.target.checked;
+                });
             });
-
-            function parseM3U(content) {
-                const lines = content.split(/\r?\n/);
-                const channels = [];
-                let currentName = 'Unnamed';
-                let currentLogo = '';
-
-                for (let i = 0; i < lines.length; i++) {
-                    let line = lines[i].trim();
-                    if (line.startsWith('#EXTINF:')) {
-                        const logoMatch = line.match(/tvg-logo="([^"]*)"/i);
-                        currentLogo = logoMatch ? logoMatch[1] : '';
-                        const nameMatch = line.match(/,(.+)$/);
-                        currentName = nameMatch ? nameMatch[1].trim() : 'Unnamed';
-                    } else if (line && !line.startsWith('#')) {
-                        channels.push({
-                            name: currentName,
-                            url: line,
-                            logo: currentLogo || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentName)}&background=2b7a4b&color=fff&size=75&length=1&bold=true`,
-                        });
-                        currentName = 'Unnamed';
-                        currentLogo = '';
-                    }
-                }
-                return channels;
-            }
-
-            function renderChannels() {
-                if (!channels.length) {
-                    channelsContainer.innerHTML = `<div style="padding:40px;text-align:center;color:#8aaaca;"><i class="fas fa-folder-open"></i> No channels found</div>`;
-                    updateStats();
-                    return;
-                }
-
-                let html = '';
-                channels.forEach((ch) => {
-                    const status = checkStatusMap.get(ch.url);
-                    let ledClass = 'led gray';
-                    if (status === 'checking') ledClass = 'led yellow';
-                    else if (status === true) ledClass = 'led green';
-                    else if (status === false) ledClass = 'led red';
-
-                    const checkedAttr = ch.selected ? 'checked' : '';
-
-                    html += `<div class="channel-row" data-url="${ch.url}">
-                        <div class="channel-select">
-                            <input type="checkbox" class="channel-checkbox" data-url="${ch.url}" ${checkedAttr}>
-                        </div>
-                        <img class="channel-logo" src="${ch.logo}" alt="logo" loading="lazy" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(ch.name)}&background=2b7a4b&color=fff&size=75&length=1&bold=true';">
-                        <div class="channel-info">
-                            <div class="channel-name">${ch.name}</div>
-                            <div class="channel-url-preview">${ch.url.substring(0,70)}${ch.url.length>70?'…':''}</div>
-                        </div>
-                        <div class="status-led">
-                            <span class="${ledClass}"></span>
-                        </div>
-                        <div class="action-buttons">
-                            <button class="copy-btn" data-url="${ch.url}"><i class="far fa-copy"></i> Copy</button>
-                            <button class="play-btn" data-url="${ch.url}" data-logo="${ch.logo}"><i class="fas fa-play"></i> Play</button>
-                        </div>
-                    </div>`;
-                });
-                channelsContainer.innerHTML = html;
-
-                document.querySelectorAll('.copy-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const url = e.currentTarget.dataset.url;
-                        navigator.clipboard.writeText(url).then(() => alert('URL copied'));
-                    });
-                });
-
-                document.querySelectorAll('.play-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const url = e.currentTarget.dataset.url;
-                        const logo = e.currentTarget.dataset.logo;
-                        openPlayerWithUrl(url, logo);
-                    });
-                });
-
-                document.querySelectorAll('.channel-checkbox').forEach(cb => {
-                    cb.addEventListener('change', (e) => {
-                        const url = e.target.dataset.url;
-                        const ch = channels.find(c => c.url === url);
-                        if (ch) ch.selected = e.target.checked;
-                    });
-                });
-                updateStats();
-            }
-
-            function updateStats() {
-                const total = channels.length;
-                const green = channels.filter(ch => checkStatusMap.get(ch.url) === true).length;
-                const red = channels.filter(ch => checkStatusMap.get(ch.url) === false).length;
-                totalSpan.innerText = total;
-                greenSpan.innerText = green;
-                redSpan.innerText = red;
-            }
-
-            async function checkChannel(url) {
-                if (abortControllers.has(url)) abortControllers.get(url).abort();
-                const controller = new AbortController();
-                abortControllers.set(url, controller);
-                checkStatusMap.set(url, 'checking');
-                renderChannels();
-
-                try {
-                    const res = await fetch(url, { 
-                        method: 'GET', 
-                        headers: { 'Range': 'bytes=0-1' }, 
-                        signal: controller.signal, 
-                        mode: 'cors' 
-                    });
-                    if (res.ok || res.status === 206) checkStatusMap.set(url, true);
-                    else checkStatusMap.set(url, false);
-                } catch (err) {
-                    if (err.name === 'AbortError') return;
-                    try {
-                        const headRes = await fetch(url, { 
-                            method: 'HEAD', 
-                            signal: controller.signal 
-                        });
-                        checkStatusMap.set(url, headRes.ok);
-                    } catch {
-                        checkStatusMap.set(url, false);
-                    }
-                } finally {
-                    abortControllers.delete(url);
-                    renderChannels();
-                }
-            }
-
-            function checkAllChannels() {
-                channels.forEach((ch, idx) => {
-                    setTimeout(() => {
-                        if (!abortControllers.has(ch.url)) checkChannel(ch.url);
-                    }, idx * 100);
-                });
-            }
-
-            async function loadFromUrl(url) {
-                if (!url) return;
-                try {
-                    const resp = await fetch(url);
-                    const text = await resp.text();
-                    loadPlaylistContent(text);
-                } catch {
-                    alert('Failed to load playlist');
-                }
-            }
-
-            function loadFromFile(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => loadPlaylistContent(e.target.result);
-                reader.readAsText(file);
-            }
-
-            function loadPlaylistContent(content) {
-                for (let [_, ctrl] of abortControllers) ctrl.abort();
-                abortControllers.clear();
-                const parsed = parseM3U(content);
-                channels = parsed.map(ch => ({ ...ch, selected: false }));
-                checkStatusMap.clear();
-                renderChannels();
-                if (channels.length) checkAllChannels();
-                else channelsContainer.innerHTML = `<div style="padding:40px;text-align:center;">No valid streams found</div>`;
-            }
-
-            function resetEverything() {
-                for (let [_, ctrl] of abortControllers) ctrl.abort();
-                abortControllers.clear();
-                channels = [];
-                checkStatusMap.clear();
-                urlInput.value = '';
-                renderChannels();
-                closeModal();
-            }
-
-            clearBtn.addEventListener('click', () => { urlInput.value = ''; });
-            loadUrlBtn.addEventListener('click', () => { if (urlInput.value.trim()) loadFromUrl(urlInput.value.trim()); });
-            resetAllBtn.addEventListener('click', resetEverything);
-            urlInput.addEventListener('paste', () => setTimeout(() => { if (urlInput.value.trim()) loadFromUrl(urlInput.value.trim()); }, 50));
-            urlInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loadUrlBtn.click(); });
-
-            dragArea.addEventListener('click', () => fileInput.click());
-            dragArea.addEventListener('dragover', (e) => { e.preventDefault(); dragArea.classList.add('active'); });
-            dragArea.addEventListener('dragleave', () => dragArea.classList.remove('active'));
-            dragArea.addEventListener('drop', (e) => {
-                e.preventDefault(); dragArea.classList.remove('active');
-                const file = e.dataTransfer.files[0];
-                if (file && (file.name.endsWith('.m3u') || file.name.endsWith('.m3u8') || file.name.endsWith('.txt'))) loadFromFile(file);
-                else alert('Please drop .m3u or .txt file');
-            });
-            fileInput.addEventListener('change', () => { if (fileInput.files.length) loadFromFile(fileInput.files[0]); });
-
-            selectAllGreenBtn.addEventListener('click', () => {
-                channels.forEach(ch => { ch.selected = checkStatusMap.get(ch.url) === true; });
-                renderChannels();
-            });
-            deselectAllBtn.addEventListener('click', () => {
-                channels.forEach(ch => ch.selected = false);
-                renderChannels();
-            });
-            downloadBtn.addEventListener('click', () => {
-                const selected = channels.filter(ch => ch.selected);
-                if (!selected.length) return alert('No channel selected');
-                const count = selected.length;
-                const today = new Date();
-                const day = String(today.getDate()).padStart(2,'0');
-                const month = String(today.getMonth()+1).padStart(2,'0');
-                const year = today.getFullYear();
-                const dateStr = `${day}-${month}-${year}`;
-                const filename = `Sirome TV (${count})-${dateStr}.m3u`;
-
-                let m3u = '#EXTM3U\n';
-                selected.forEach(ch => { 
-                    m3u += `#EXTINF:-1 tvg-logo="${ch.logo}",${ch.name}\n${ch.url}\n`; 
-                });
-                const blob = new Blob([m3u], { type: 'audio/x-mpegurl' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = filename;
-                a.click();
-            });
-
             updateStats();
-        })();
-    </script>
+        }
+
+        function updateStats() {
+            const total = channels.length;
+            const green = channels.filter(ch => checkStatusMap.get(ch.url) === true).length;
+            const red = channels.filter(ch => checkStatusMap.get(ch.url) === false).length;
+            document.getElementById('totalCount').innerText = total;
+            document.getElementById('greenCount').innerText = green;
+            const redSpan = document.getElementById('redCount');
+            if (redSpan) redSpan.innerText = red;
+        }
+
+        // checking with abort
+        async function checkChannel(url) {
+            if (abortControllers.has(url)) abortControllers.get(url).abort();
+            const controller = new AbortController();
+            abortControllers.set(url, controller);
+            checkStatusMap.set(url, 'checking');
+            renderChannels();
+            try {
+                const res = await fetch(url, { method: 'GET', headers: { 'Range': 'bytes=0-1' }, signal: controller.signal, mode: 'cors' });
+                if (res.ok || res.status === 206) checkStatusMap.set(url, true);
+                else checkStatusMap.set(url, false);
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+                try {
+                    const head = await fetch(url, { method: 'HEAD', signal: controller.signal });
+                    checkStatusMap.set(url, head.ok);
+                } catch { checkStatusMap.set(url, false); }
+            } finally {
+                abortControllers.delete(url);
+                renderChannels();
+            }
+        }
+
+        function checkAllChannels() {
+            channels.forEach((ch, i) => setTimeout(() => {
+                if (!abortControllers.has(ch.url)) checkChannel(ch.url);
+            }, i*120));
+        }
+
+        async function loadFromUrl(url) {
+            if (!url) return;
+            try {
+                const resp = await fetch(url);
+                const text = await resp.text();
+                loadPlaylistContent(text);
+            } catch { alert('failed to load playlist'); }
+        }
+
+        function loadFromFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => loadPlaylistContent(e.target.result);
+            reader.readAsText(file);
+        }
+
+        function loadPlaylistContent(content) {
+            for (let c of abortControllers.values()) c.abort();
+            abortControllers.clear();
+            checkStatusMap.clear();
+            const parsed = parseM3U(content);
+            channels = parsed.map(ch => ({ ...ch, selected: false }));
+            renderChannels();
+            if (channels.length) checkAllChannels();
+            else channelsContainer.innerHTML = `<div style="padding:40px;text-align:center">No valid streams found</div>`;
+        }
+
+        // reset everything
+        function resetAll() {
+            for (let c of abortControllers.values()) c.abort();
+            abortControllers.clear();
+            channels = [];
+            checkStatusMap.clear();
+            urlInput.value = '';
+            renderChannels();
+        }
+
+        // Player overlay logic
+        function openPlayerWithUrl(initialUrl) {
+            playerUrlInput.value = initialUrl;
+            overlay.style.display = 'flex';
+            if (clapprPlayer) clapprPlayer.destroy();
+            clapprPlayer = new Clappr.Player({
+                source: initialUrl,
+                parentId: "#player",
+                autoPlay: true,
+                mute: false,
+                width: "100%",
+                height: "100%",
+                plugins: [HlsjsPlayback, LevelSelector, window.ClapprPipMode?.PipButton].filter(Boolean),
+                mediacontrol: { seekbar: "#e34f4f", buttons: "#eee" },
+                poster: "https://i.postimg.cc/cJBhWxv5/3122396-icoCopy.png"
+            });
+        }
+
+        function closePlayer() {
+            overlay.style.display = 'none';
+            if (clapprPlayer) { clapprPlayer.destroy(); clapprPlayer = null; }
+        }
+
+        // Event listeners
+        clearBtn.addEventListener('click', () => { urlInput.value = ''; urlInput.focus(); });
+        loadUrlBtn.addEventListener('click', () => { if (urlInput.value.trim()) loadFromUrl(urlInput.value.trim()); });
+        resetAllBtn.addEventListener('click', resetAll);
+
+        dragArea.addEventListener('click', () => fileInput.click());
+        dragArea.addEventListener('dragover', (e) => { e.preventDefault(); dragArea.classList.add('active'); });
+        dragArea.addEventListener('dragleave', () => dragArea.classList.remove('active'));
+        dragArea.addEventListener('drop', (e) => {
+            e.preventDefault(); dragArea.classList.remove('active');
+            const file = e.dataTransfer.files[0];
+            if (file && (file.name.endsWith('.m3u')||file.name.endsWith('.m3u8')||file.name.endsWith('.txt'))) loadFromFile(file);
+            else alert('please drop .m3u/.txt');
+        });
+        fileInput.addEventListener('change', () => { if (fileInput.files.length) loadFromFile(fileInput.files[0]); });
+
+        selectAllGreenBtn.addEventListener('click', () => {
+            channels.forEach(ch => { ch.selected = checkStatusMap.get(ch.url) === true; });
+            renderChannels();
+        });
+        deselectAllBtn.addEventListener('click', () => {
+            channels.forEach(ch => ch.selected = false);
+            renderChannels();
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const selected = channels.filter(ch => ch.selected);
+            if (!selected.length) return alert('no channel selected');
+            const date = new Date();
+            const day = String(date.getDate()).padStart(2,'0');
+            const month = String(date.getMonth()+1).padStart(2,'0');
+            const year = date.getFullYear();
+            const filename = `Sirome TV (${selected.length})-${day}-${month}-${year}.m3u`;
+            let content = '#EXTM3U\n';
+            selected.forEach(ch => content += `#EXTINF:-1 tvg-logo="${ch.logo}",${ch.name}\n${ch.url}\n`);
+            const blob = new Blob([content], {type: 'audio/x-mpegurl'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+        });
+
+        // player controls
+        closePlayerBtn.addEventListener('click', closePlayer);
+        loadPlayerBtn.addEventListener('click', () => {
+            const newUrl = playerUrlInput.value.trim();
+            if (!newUrl) return;
+            if (clapprPlayer) clapprPlayer.destroy();
+            clapprPlayer = new Clappr.Player({
+                source: newUrl,
+                parentId: "#player",
+                autoPlay: true,
+                plugins: [HlsjsPlayback, LevelSelector, window.ClapprPipMode?.PipButton].filter(Boolean)
+            });
+        });
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closePlayer(); });
+
+        // optional: paste trigger
+        urlInput.addEventListener('paste', () => setTimeout(() => {
+            if (urlInput.value.trim()) loadFromUrl(urlInput.value.trim());
+        }, 50));
+
+        urlInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loadUrlBtn.click(); });
+
+        updateStats();
+    })();
+</script>
+<!-- ensure red count span is present -->
 </body>
 </html>
