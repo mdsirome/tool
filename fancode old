@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Sirome Live Fancode</title>
+  <!-- Clappr Core & Plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/level-selector@0.2.0/dist/level-selector.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@clappr/hlsjs-playback@1.0.1/dist/hlsjs-playback.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/clappr-pip-mode@1.1.0/dist/clappr-pip-mode.min.js"></script>
+  <style>
+    /* reset & base */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      background: #0a0c0f;
+      color: #e0e0e0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      overscroll-behavior: auto; /*none এর বদল auto দিয়েছি বাউন্স বন্ধ, স্ক্রোল চলবে */
+      overflow-x: hidden;
+    }
+
+    /* বাটন ও ইন্টারঅ্যাকটিভ উপাদানে ক্লিক/সিলেক্ট স্বাভাবিক */
+    button, a, iframe, .watch-btn, .support-btn, .tab, .close-modal {
+      -webkit-user-select: auto;
+      user-select: auto;
+      -webkit-touch-callout: default;
+    }
+
+    /* হেডার: আইকন + টেক্সট এক লাইনে */
+    .premium-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 15px 0 5px;
+      padding: 0 12px;
+      flex-wrap: nowrap;
+    }
+    .header-icon {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .animated-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .powered-by {
+      text-align: center;
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #2a2a2a;
+      padding-bottom: 8px;
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .counter-box {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      background: #1a1e24;
+      border-radius: 40px;
+      padding: 10px 20px;
+      width: fit-content;
+      margin: 10px auto;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      border: 1px solid #333a44;
+    }
+    .counter-box span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #ccddee;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 6px 12px;
+      justify-content: center;
+      background: #13171d;
+      flex-wrap: wrap;
+      border-radius: 50px;
+      width: fit-content;
+      margin: 15px auto;
+    }
+    .tab {
+      padding: 8px 18px;
+      border-radius: 40px;
+      background: #242a33;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: 0.1s;
+      border: 1px solid transparent;
+      color: #ccddee;
+    }
+    .tab.active {
+      background: #00e6b8;
+      color: #0a0c0f;
+      font-weight: 700;
+      border-color: #ffffff50;
+      box-shadow: 0 0 10px #00e6b8;
+    }
+    .tab:active, .watch-btn:active, .support-btn:active, .close-modal:active {
+      opacity: 0.8;
+      transform: scale(0.99);
+    }
+
+    .container {
+      padding: 8px 12px 80px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #171c22;
+      border-radius: 28px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.7);
+      border: 1px solid #2e3a44;
+    }
+
+    .thumb-wrapper {
+      position: relative;
+      background: #000;
+    }
+    .tag {
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 11px;
+      position: absolute;
+      margin: 12px;
+      z-index: 2;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .tag.live {
+      background: #e11d48;
+      color: white;
+      animation: blink 1.2s infinite;
+      box-shadow: 0 0 12px #ff1a4f;
+    }
+    .tag.upcoming {
+      background: #fbbf24;
+      color: #0a0c0f;
+      box-shadow: 0 0 10px #fbbf24;
+    }
+    .tag.completed {
+      background: #6c757d;
+      color: white;
+      box-shadow: 0 0 8px #6c757d;
+    }
+    @keyframes blink { 0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;} }
+
+    .thumb {
+      width: 100%;
+      aspect-ratio: 1080/810;
+      object-fit: contain;
+      background: #0a0c0f;
+      border-bottom: 2px solid #2a3a44;
+    }
+
+    .content {
+      padding: 14px 14px 18px;
+    }
+    .match-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .tourney {
+      font-size: 13px;
+      color: #9aaebf;
+      margin: 4px 0 8px;
+      font-weight: 400;
+    }
+
+    /* shared row style */
+    .info-row {
+      background: #0e141c;
+      padding: 6px 12px;
+      border-radius: 40px;
+      margin: 10px 0 6px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #2e4a5a;
+      color: #bbf0ff;
+      font-weight: 500;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .info-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .info-value {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      background: #1f2a33;
+      padding: 3px 10px;
+      border-radius: 30px;
+      color: #ffd966;
+      font-size: 12px;
+    }
+    .countdown-timer {
+      background: #0e141c;
+      padding: 6px 12px;
+      border-radius: 40px;
+      margin: 6px 0 0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #2e5a6a;
+      color: #bbf0ff;
+      font-weight: 500;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .timer-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .timer-value {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      background: #1f2a33;
+      padding: 4px 12px;
+      border-radius: 30px;
+      letter-spacing: 1px;
+      color: #00e6b8;
+      font-size: 13px;
+    }
+
+    /* watch button (live) */
+    .watch-btn {
+      background: #00e6b8;
+      color: #0a0c0f;
+      padding: 12px 16px;
+      border-radius: 60px;
+      margin-top: 16px;
+      font-weight: 700;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      transition: 0.1s;
+      box-shadow: 0 6px 12px rgba(0,230,184,0.3);
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .watch-btn:active {
+      opacity: 0.8;
+      transform: scale(0.99);
+    }
+
+    /* support button (upcoming & finished) */
+    .support-btn {
+      background: #3b4b5e;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 60px;
+      margin-top: 16px;
+      font-weight: 700;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      transition: 0.1s;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .support-btn:active {
+      opacity: 0.8;
+      transform: scale(0.99);
+    }
+    /* ছোট ফন্টের জন্য আলাদা ক্লাস (শুধু finished বাটনে) */
+    .support-btn.small-text {
+      font-size: 13px;
+      padding: 10px 12px;
+    }
+
+    .telegram-fab {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1e2b38;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 60px;
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(6px);
+      border: 1px solid #3a5a6a;
+      font-size: 14px;
+    }
+    .telegram-fab:active {
+      opacity: 0.8;
+    }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000e0;
+      backdrop-filter: blur(12px);
+    }
+    .modal-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #0e1217;
+      border-left: 1px solid #2a3a44;
+      border-right: 1px solid #2a3a44;
+      box-shadow: 0 0 40px rgba(255,255,255,0.1);
+      position: relative;
+    }
+    .close-modal {
+      position: absolute;
+      top: 6px;
+      right: 12px;
+      color: #fff;
+      font-size: 30px;
+      font-weight: 300;
+      cursor: pointer;
+      z-index: 10002;
+      text-shadow: 0 0 10px black;
+      line-height: 1;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1f2a33cc;
+      border-radius: 50%;
+      backdrop-filter: blur(4px);
+      border: 1px solid #5a7a88;
+      transition: 0.1s;
+    }
+    .close-modal:active {
+      background: #e11d48;
+      opacity: 0.9;
+    }
+
+    .modal-title-bar {
+      padding: 12px 18px;
+      background: #0a0f14;
+      color: #00e6b8;
+      font-weight: 600;
+      font-size: 1rem;
+      border-bottom: 1px solid #2a4050;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+
+    .video-section {
+      width: 100%;
+      background: black;
+      box-shadow: 0 8px 24px rgba(255,255,255,0.1);
+    }
+    #player {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: black;
+      display: block;
+    }
+
+    /* smartlink section with 10px top gap and strong blur */
+    .smartlink-section {
+      width: 100%;
+      margin-top: 20px;
+      flex: 1;
+      background: #0a0c0f;
+      min-height: 120px;
+    }
+    .smartlink-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #11161c;
+      filter: blur(5px);
+      pointer-events: auto;
+    }
+    .smartlink-iframe:hover {
+      filter: blur(3px);
+    }
+
+    /* mobile adjustments */
+    @media (max-width: 480px) {
+      .premium-header {
+        gap: 5px;
+      }
+      .header-icon {
+        width: 28px;
+        height: 28px;
+      }
+      .animated-text {
+        font-size: 1.1rem;
+      }
+      .counter-box {
+        gap: 12px;
+        font-size: 13px;
+        padding: 8px 16px;
+      }
+      .tab {
+        padding: 6px 14px;
+        font-size: 13px;
+      }
+      .match-title {
+        font-size: 17px;
+      }
+      .close-modal {
+        width: 32px;
+        height: 32px;
+        font-size: 26px;
+        top: 4px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- হেডার: এক লাইনে আইকন + টেক্সট -->
+<div class="premium-header">
+  <img class="header-icon" src="https://i.postimg.cc/d1hHy4ss/11.png" alt="logo">
+  <span class="animated-text">LIVE FANCODE For Bangladesh</span>
+</div>
+<div class="powered-by">Powered by: Sirome TV 2022-2026</div>
+
+<!-- কাউন্টার (Finished যোগ করা হয়েছে) -->
+<div class="counter-box" id="counterBox">
+  <span>🔴 Live 0</span>
+  <span>⏳ Upcoming 0</span>
+  <span>✅ Finished 0</span>
+  <span>📋 Total 0</span>
+</div>
+
+<!-- ট্যাব (Finished ট্যাব যুক্ত) -->
+<div class="tabs">
+  <div class="tab active" onclick="filterEvents('all')">📋 All Match</div>
+  <div class="tab" onclick="filterEvents('live')">🔴 Live Now</div>
+  <div class="tab" onclick="filterEvents('completed')">✅ Finished</div>
+  <div class="tab" onclick="filterEvents('upcoming')">⏳ Upcoming</div>
+</div>
+
+<!-- কার্ড কন্টেইনার -->
+<div class="container" id="eventsContainer"></div>
+
+<!-- টেলিগ্রাম -->
+<a href="https://t.me/sirometv" target="_blank" class="telegram-fab">
+  📢 Join Telegram
+</a>
+
+<!-- মোডাল প্লেয়ার: ভিডিও + 10px গ্যাপ + ব্লার আইফ্রেম -->
+<div id="videoModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeModalBtn">&times;</span>
+    <div class="modal-title-bar" id="modalMatchTitle">ম্যাচ লোড হচ্ছে...</div>
+    <div class="video-section">
+      <div id="player"></div>
+    </div>
+    <div class="smartlink-section" id="smartlinkContainer">
+      <iframe id="smartlinkIframe" class="smartlink-iframe" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" allow="fullscreen"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ---------- কনফিগারেশন ----------
+  const JSON_URL = "https://raw.githubusercontent.com/jitendra-unatti/fancode/refs/heads/main/data/fancode.json";
+  const BASE_M3U8_URL = "https://raw.githubusercontent.com/sirometv/playlist/main/fancode/";
+  const WATERMARK_URL = "https://i.postimg.cc/d1hHy4ss/11.png";
+
+  const SMART_LINKS = [
+    "https://clenchinfer.com/bv8w90r2?key=d74e1d59949afbcb5588a975eb262202",
+    "https://clenchinfer.com/bqrk2teaq?key=65d9e8b08ffe5f578d11104108fce958",
+    "https://clenchinfer.com/gq968gjnk?key=62e59ae53115a83f79c455d7f0529f0f",
+    "https://clenchinfer.com/fdrnenimd?key=d2bcc08643a94a794af40f3738c31c4b",
+    "https://clenchinfer.com/d5yhbq8kg?key=a6e7f0b5411e29ddfc4ad4b07f0bd55e"
+  ];
+
+  let allMatches = [];
+  let currentFilter = "all";
+  let clapprPlayer = null;
+  let countdownInterval = null;
+
+  // ---------- JSON ফেচ ----------
+  fetch(JSON_URL)
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+    .then(data => {
+      let rawMatches = [];
+      if (Array.isArray(data)) rawMatches = data;
+      else if (data?.matches) rawMatches = data.matches;
+      else if (data?.data) rawMatches = data.data;
+      else {
+        for (let k in data) { if (Array.isArray(data[k])) { rawMatches = data[k]; break; } }
+      }
+
+      allMatches = rawMatches.map(item => {
+        let category = item.category || '';
+        let title = item.title || item.match_group_title || item.name || item.event_name || '';
+        let tournament = item.tournament || item.event_name || item.series || item.league || '';
+
+        let slug = '';
+        if (category && title) {
+          slug = category.replace(/\s+/g, '') + '-' + title.replace(/\s+/g, '');
+        } else {
+          let fallback = (category || title || item.match_group_title || item.name || '').replace(/\s+/g, '');
+          slug = fallback;
+        }
+        let m3u8Url = slug ? BASE_M3U8_URL + slug + '.m3u8' : '#';
+
+        let rawStatus = (item.status || '').toUpperCase();
+        let status = '';
+        if (rawStatus === 'LIVE') status = 'LIVE';
+        else if (rawStatus === 'COMPLETED') status = 'COMPLETED';
+        else if (rawStatus === 'NOT_STARTED' || rawStatus === 'UPCOMING') status = 'UPCOMING';
+        else if (item.isLive) status = 'LIVE';
+        else if (item.upcoming) status = 'UPCOMING';
+        else status = 'UPCOMING';
+
+        let thumb = item.src || item.thumb || item.image || item.thumbnail || item.poster || 'https://via.placeholder.com/1080x810/1e1e1e/888?text=No+Image';
+
+        let startTimeRaw = item.startTime || item.start_time || item.start || '';
+        let startTime = startTimeRaw ? new Date(startTimeRaw) : null;
+        if (startTime && isNaN(startTime)) startTime = null;
+
+        return {
+          title: title || 'শিরোনাম নেই',
+          fullTitle: title || (item.team1 && item.team2 ? `${item.team1} vs ${item.team2}` : ''),
+          team1: item.team_1 || item.team1 || item.teamA || (title && title.includes('vs') ? title.split('vs')[0].trim() : ''),
+          team2: item.team_2 || item.team2 || item.teamB || (title && title.includes('vs') ? title.split('vs')[1].trim() : ''),
+          eventName: tournament || 'অন্যান্য',
+          status: status,
+          thumb: thumb,
+          m3u8Url: m3u8Url,
+          startTime: startTime,
+          startTimeRaw: startTimeRaw
+        };
+      }).filter(m => m.title !== 'শিরোনাম নেই');
+
+      updateCounters();
+      render();
+      startCountdownUpdater();
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("eventsContainer").innerHTML = `<div style="padding:40px; color:red; text-align:center;">ডাটা লোড হয়নি</div>`;
+    });
+
+  // ---------- কাউন্টার আপডেট ----------
+  function updateCounters() {
+    let live = allMatches.filter(m => m.status === 'LIVE').length;
+    let upcoming = allMatches.filter(m => m.status === 'UPCOMING').length;
+    let completed = allMatches.filter(m => m.status === 'COMPLETED').length;
+    let total = allMatches.length;
+    document.getElementById("counterBox").innerHTML = 
+      `<span>🔴 Live ${live}</span> <span>⏳ Upcoming ${upcoming}</span> <span>✅ Finished ${completed}</span> <span>📋 Total ${total}</span>`;
+  }
+
+  // ---------- ফিল্টার ----------
+  window.filterEvents = function(type) {
+    currentFilter = type;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    const tabs = document.querySelectorAll('.tab');
+    if (type === 'all') tabs[0].classList.add('active');
+    else if (type === 'live') tabs[1].classList.add('active');
+    else if (type === 'completed') tabs[2].classList.add('active');
+    else if (type === 'upcoming') tabs[3].classList.add('active');
+    render();
+  };
+
+  // ---------- সময় পার্থক্য (শেষ হওয়া ম্যাচের জন্য) ----------
+  function getTimeAgoString(pastDate) {
+    if (!pastDate) return 'Unknown';
+    const now = new Date();
+    const diffMs = now - pastDate;
+    if (diffMs < 0) return 'Future date?';
+    const totalSec = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSec / 86400);
+    const hours = Math.floor((totalSec % 86400) / 3600);
+    const minutes = Math.floor((totalSec % 3600) / 60);
+    const seconds = totalSec % 60;
+    if (days > 0) return `${days}d ${hours}h ${minutes}m ${seconds}s ago`;
+    if (hours > 0) return `${hours}h ${minutes}m ${seconds}s ago`;
+    if (minutes > 0) return `${minutes}m ${seconds}s ago`;
+    return `${seconds}s ago`;
+  }
+
+  // ---------- upcoming / live এর জন্য কাউন্টডাউন ----------
+  function getCountdownString(startDate) {
+    if (!startDate) return null;
+    const now = new Date();
+    const diffMs = startDate - now;
+    if (diffMs <= 0) return 'LIVE NOW';
+    const totalSec = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSec / 86400);
+    const hours = Math.floor((totalSec % 86400) / 3600);
+    const minutes = Math.floor((totalSec % 3600) / 60);
+    const seconds = totalSec % 60;
+    if (days > 0) return `${days} Day ${hours} Hour ${minutes} Min ${seconds} Sec`;
+    if (hours > 0) return `${hours} Hour ${minutes} Min ${seconds} Sec`;
+    if (minutes > 0) return `${minutes} Min ${seconds} Sec`;
+    return `${seconds} Sec`;
+  }
+
+  // ---------- রেন্ডার ----------
+  function render() {
+    const container = document.getElementById("eventsContainer");
+    if (!container) return;
+
+    let filtered = allMatches;
+    if (currentFilter === 'live') filtered = allMatches.filter(m => m.status === 'LIVE');
+    else if (currentFilter === 'upcoming') filtered = allMatches.filter(m => m.status === 'UPCOMING');
+    else if (currentFilter === 'completed') filtered = allMatches.filter(m => m.status === 'COMPLETED');
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#aaa;">কোন ইভেন্ট নেই</div>`;
+      return;
+    }
+
+    let html = '';
+    filtered.forEach((m, idx) => {
+      let statusClass = '';
+      let statusText = m.status;
+      if (m.status === 'LIVE') statusClass = 'live';
+      else if (m.status === 'UPCOMING') statusClass = 'upcoming';
+      else if (m.status === 'COMPLETED') statusClass = 'completed';
+
+      const matchDisplayTitle = m.fullTitle || (m.team1 && m.team2 ? `${m.team1} vs ${m.team2}` : m.title);
+
+      // extra info based on status
+      let extraHtml = '';
+      if (m.status === 'UPCOMING') {
+        const startStr = m.startTimeRaw ? m.startTimeRaw : '';
+        let startDisplay = startStr ? `<div class="info-row"><span class="info-label">📅 Starting Time:</span><span class="info-value">${escapeHtml(startStr)}</span></div>` : '';
+        let countdownDisplay = '';
+        if (m.startTime) {
+          const countdownStr = getCountdownString(m.startTime);
+          countdownDisplay = `<div class="countdown-timer" data-start="${m.startTime.toISOString()}" data-index="${idx}"><span class="timer-label">⏳ Match Start In:</span><span class="timer-value">${countdownStr}</span></div>`;
+        } else {
+          countdownDisplay = `<div class="countdown-timer"><span class="timer-label">⏳ Match Start In:</span><span class="timer-value">Not Scheduled</span></div>`;
+        }
+        extraHtml = startDisplay + countdownDisplay;
+      } else if (m.status === 'COMPLETED') {
+        const startStr = m.startTimeRaw ? m.startTimeRaw : '';
+        // Ending Time দেখাচ্ছি (startTime কেই শেষ সময় ধরে)
+        let startDisplay = startStr ? `<div class="info-row"><span class="info-label">📅 Ending Time:</span><span class="info-value">${escapeHtml(startStr)}</span></div>` : '';
+        let endedDisplay = '';
+        if (m.startTime) {
+          const endedStr = getTimeAgoString(m.startTime);
+          endedDisplay = `<div class="countdown-timer"><span class="timer-label">⏳ Match Ended:</span><span class="timer-value">${endedStr}</span></div>`;
+        } else {
+          endedDisplay = `<div class="countdown-timer"><span class="timer-label">⏳ Match Ended:</span><span class="timer-value">Finished</span></div>`;
+        }
+        extraHtml = startDisplay + endedDisplay;
+      } else if (m.status === 'LIVE') {
+        // live তে কিছু দেখানোর দরকার নেই (শুধু বাটন)
+      }
+
+      // button based on status
+      let buttonHtml = '';
+      if (m.status === 'LIVE') {
+        buttonHtml = `<button class="watch-btn" data-m3u8="${m.m3u8Url}" data-fulltitle="${escapeHtml(matchDisplayTitle)}">▶ Watch This Match Play</button>`;
+      } else if (m.status === 'UPCOMING') {
+        buttonHtml = `<button class="support-btn" data-smart="true">🤝 Support Me</button>`;
+      } else if (m.status === 'COMPLETED') {
+        // finished ম্যাচেও support me বাটন, কিন্তু লেখা লম্বা, তাই ছোট ফন্ট
+        buttonHtml = `<button class="support-btn small-text" data-smart="true">📌 Match Finished Watch Another Match</button>`;
+      }
+
+      html += `
+        <div class="card" data-match-idx="${idx}">
+          <div class="thumb-wrapper">
+            <span class="tag ${statusClass}">${statusText}</span>
+            <img class="thumb" src="${m.thumb}" alt="thumb" loading="lazy" onerror="this.src='https://via.placeholder.com/1080x810/1e1e1e/888?text=Error'">
+          </div>
+          <div class="content">
+            <div class="match-title">${escapeHtml(matchDisplayTitle)}</div>
+            <div class="tourney">${escapeHtml(m.eventName)}</div>
+            ${extraHtml}
+            ${buttonHtml}
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+    // লাইভ বাটন ইভেন্ট
+    document.querySelectorAll('.watch-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = this.getAttribute('data-m3u8');
+        const title = this.getAttribute('data-fulltitle') || 'ম্যাচ';
+        if (url && url !== '#') openPlayer(url, title);
+      });
+    });
+
+    // সাপোর্ট বাটন ইভেন্ট (আপকামিং এবং ফিনিশড)
+    document.querySelectorAll('.support-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const randomLink = SMART_LINKS[Math.floor(Math.random() * SMART_LINKS.length)];
+        window.open(randomLink, '_blank');
+      });
+    });
+  }
+
+  // ---------- কাউন্টডাউন আপডেটার ----------
+  function startCountdownUpdater() {
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      document.querySelectorAll('.countdown-timer[data-start]').forEach(el => {
+        const startIso = el.getAttribute('data-start');
+        if (!startIso) return;
+        const startDate = new Date(startIso);
+        const str = getCountdownString(startDate);
+        const valueSpan = el.querySelector('.timer-value');
+        if (valueSpan) valueSpan.innerText = str || 'LIVE NOW';
+      });
+    }, 1000);
+  }
+
+  // ---------- Clappr প্লেয়ার ----------
+  function initPlayer(url, logoUrl) {
+    function injectWatermarkStyles() {
+      if (document.getElementById('clappr-watermark-style')) return;
+      const style = document.createElement('style');
+      style.id = 'clappr-watermark-style';
+      style.textContent = `
+        .clappr-watermark[data-watermark] {
+          position: absolute; min-width: 70px; max-width: 200px; width: 12%; text-align: center; z-index: 10;
+          left: 10% !important; bottom: 13% !important; top: auto !important; right: auto !important;
+          transform: scale(0.7) !important; transform-origin: left bottom !important;
+        }
+        .clappr-watermark[data-watermark] img { max-width: 100%; border: none; opacity: 0.7; box-shadow: none; }
+        .clappr-poster.hide { opacity: 0; transition: opacity 0.5s ease; }
+      `;
+      document.head.appendChild(style);
+    }
+    injectWatermarkStyles();
+
+    if (clapprPlayer?.destroy) clapprPlayer.destroy();
+    const posterGif = "https://i.pinimg.com/originals/5a/93/4e/5a934e84f67d2a61a118ec95b1d6cb74.gif";
+
+    clapprPlayer = new Clappr.Player({
+      source: url,
+      parentId: "#player",
+      autoPlay: true,
+      mute: false,
+      width: "100%",
+      height: "100%",
+      watermark: logoUrl,
+      watermarkPosition: 'bottom-right',
+      watermarkOpacity: 0.7,
+      plugins: [ HlsjsPlayback, LevelSelector, window.ClapprPipMode?.PipButton ].filter(Boolean),
+      mediacontrol: { seekbar: "red", buttons: "white" },
+      poster: posterGif
+    });
+
+    clapprPlayer.on('play', () => {
+      const poster = document.querySelector('.clappr-poster');
+      if (poster) { poster.classList.add('hide'); setTimeout(() => poster.style.display = 'none', 500); }
+    });
+  }
+
+  // ---------- মোডাল ওপেন ----------
+  function openPlayer(url, title) {
+    const modal = document.getElementById('videoModal');
+    const titleBar = document.getElementById('modalMatchTitle');
+    titleBar.innerText = title;
+
+    const playerDiv = document.getElementById('player');
+    playerDiv.innerHTML = '';
+
+    const smartIframe = document.getElementById('smartlinkIframe');
+    smartIframe.src = SMART_LINKS[Math.floor(Math.random() * SMART_LINKS.length)];
+
+    modal.style.display = 'block';
+
+    setTimeout(() => initPlayer(url, WATERMARK_URL), 100);
+  }
+
+  // ---------- মোডাল বন্ধ ----------
+  function closeModal() {
+    const modal = document.getElementById('videoModal');
+    modal.style.display = 'none';
+
+    if (clapprPlayer?.destroy) clapprPlayer.destroy();
+    clapprPlayer = null;
+    document.getElementById('player').innerHTML = '';
+    document.getElementById('smartlinkIframe').src = '';
+  }
+
+  document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('videoModal');
+      if (modal.style.display === 'block') closeModal();
+    }
+  });
+
+  function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe.replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":"&#039;" })[c]);
+  }
+
+})();
+</script>
+</body>
+</html>
