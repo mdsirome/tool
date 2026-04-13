@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
@@ -28,7 +28,7 @@
       -webkit-touch-callout: none;
       -webkit-user-select: none;
       user-select: none;
-      overscroll-behavior: auto; /*none এর বদল auto দিয়েছি বাউন্স বন্ধ, স্ক্রোল চলবে */
+      overscroll-behavior: auto;
       overflow-x: hidden;
     }
 
@@ -484,14 +484,12 @@
 </head>
 <body>
 
-<!-- হেডার: এক লাইনে আইকন + টেক্সট -->
 <div class="premium-header">
   <img class="header-icon" src="https://i.postimg.cc/d1hHy4ss/11.png" alt="logo">
   <span class="animated-text">LIVE FANCODE For Bangladesh</span>
 </div>
 <div class="powered-by">Powered by: Sirome TV 2022-2026</div>
 
-<!-- কাউন্টার (Finished যোগ করা হয়েছে) -->
 <div class="counter-box" id="counterBox">
   <span>🔴 Live 0</span>
   <span>⏳ Upcoming 0</span>
@@ -499,7 +497,6 @@
   <span>📋 Total 0</span>
 </div>
 
-<!-- ট্যাব (Finished ট্যাব যুক্ত) -->
 <div class="tabs">
   <div class="tab active" onclick="filterEvents('all')">📋 All Match</div>
   <div class="tab" onclick="filterEvents('live')">🔴 Live Now</div>
@@ -507,15 +504,12 @@
   <div class="tab" onclick="filterEvents('upcoming')">⏳ Upcoming</div>
 </div>
 
-<!-- কার্ড কন্টেইনার -->
 <div class="container" id="eventsContainer"></div>
 
-<!-- টেলিগ্রাম -->
 <a href="https://t.me/sirometv" target="_blank" class="telegram-fab">
   📢 Join Telegram
 </a>
 
-<!-- মোডাল প্লেয়ার: ভিডিও + 10px গ্যাপ + ব্লার আইফ্রেম -->
 <div id="videoModal" class="modal">
   <div class="modal-content">
     <span class="close-modal" id="closeModalBtn">&times;</span>
@@ -532,8 +526,8 @@
 <script>
 (function() {
   // ---------- কনফিগারেশন ----------
-  const JSON_URL = "https://raw.githubusercontent.com/jitendra-unatti/fancode/refs/heads/main/data/fancode.json";
-  const BASE_M3U8_URL = "https://raw.githubusercontent.com/sirometv/playlist/main/fancode/";
+  const JSON_URL = "https://raw.githubusercontent.com/sirometv/playlist/main/fancode.json";
+  const M3U_PLAYLIST_URL = "https://raw.githubusercontent.com/sirometv/playlist/main/fancodeBD.m3u";
   const WATERMARK_URL = "https://i.postimg.cc/d1hHy4ss/11.png";
 
   const SMART_LINKS = [
@@ -545,14 +539,50 @@
   ];
 
   let allMatches = [];
+  let streamMap = new Map(); // Key: tvg-logo URL, Value: stream URL
   let currentFilter = "all";
   let clapprPlayer = null;
   let countdownInterval = null;
 
-  // ---------- JSON ফেচ ----------
-  fetch(JSON_URL)
-    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-    .then(data => {
+  // ---------- M3U ফাইল থেকে স্ট্রিমিং লিংক ও লোগো ম্যাপ তৈরি ----------
+  async function fetchM3UAndCreateMap() {
+    try {
+      const response = await fetch(M3U_PLAYLIST_URL);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const m3uText = await response.text();
+      const lines = m3uText.split(/\r?\n/);
+      
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+        if (line.startsWith('#EXTINF:')) {
+          // tvg-logo="URL" খোঁজা
+          const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+          if (logoMatch && logoMatch[1]) {
+            const logoUrl = logoMatch[1];
+            // পরের লাইনটি হওয়া উচিত স্ট্রিম URL
+            const nextLine = lines[i+1] ? lines[i+1].trim() : '';
+            if (nextLine && !nextLine.startsWith('#')) {
+              streamMap.set(logoUrl, nextLine);
+              console.log(`Mapped logo: ${logoUrl} -> Stream: ${nextLine.substring(0, 50)}...`);
+            }
+          }
+        }
+      }
+      console.log(`Total streams mapped from M3U: ${streamMap.size}`);
+    } catch (err) {
+      console.error("Error fetching or parsing M3U file:", err);
+    }
+  }
+
+  // ---------- JSON ফেচ ও ডাটা প্রস্তুত ----------
+  async function fetchAndPrepareData() {
+    await fetchM3UAndCreateMap(); // প্রথমে M3U ম্যাপ তৈরি করি
+
+    try {
+      const response = await fetch(JSON_URL);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      
       let rawMatches = [];
       if (Array.isArray(data)) rawMatches = data;
       else if (data?.matches) rawMatches = data.matches;
@@ -565,15 +595,23 @@
         let category = item.category || '';
         let title = item.title || item.match_group_title || item.name || item.event_name || '';
         let tournament = item.tournament || item.event_name || item.series || item.league || '';
-
-        let slug = '';
-        if (category && title) {
-          slug = category.replace(/\s+/g, '') + '-' + title.replace(/\s+/g, '');
-        } else {
-          let fallback = (category || title || item.match_group_title || item.name || '').replace(/\s+/g, '');
-          slug = fallback;
+        
+        // থাম্বনেইল URL (যা tvg-logo এর সাথে মিলবে)
+        let thumbUrl = item.src || item.thumb || item.image || item.thumbnail || item.poster || '';
+        
+        // এই thumbUrl এর সাথে মিল রেখে stream খুঁজি
+        let matchedStreamUrl = streamMap.get(thumbUrl) || null;
+        
+        // যদি সরাসরি ম্যাচ না খুঁজে পায়, তাহলে URL-এর অংশ মেলানোর চেষ্টা (fallback)
+        if (!matchedStreamUrl && thumbUrl) {
+          for (let [logo, stream] of streamMap.entries()) {
+            // দুটি URL এর শেষের অংশ বা ফাইলের নাম মেলানোর চেষ্টা
+            if (logo.includes(thumbUrl.split('/').pop()) || thumbUrl.includes(logo.split('/').pop())) {
+              matchedStreamUrl = stream;
+              break;
+            }
+          }
         }
-        let m3u8Url = slug ? BASE_M3U8_URL + slug + '.m3u8' : '#';
 
         let rawStatus = (item.status || '').toUpperCase();
         let status = '';
@@ -583,8 +621,6 @@
         else if (item.isLive) status = 'LIVE';
         else if (item.upcoming) status = 'UPCOMING';
         else status = 'UPCOMING';
-
-        let thumb = item.src || item.thumb || item.image || item.thumbnail || item.poster || 'https://via.placeholder.com/1080x810/1e1e1e/888?text=No+Image';
 
         let startTimeRaw = item.startTime || item.start_time || item.start || '';
         let startTime = startTimeRaw ? new Date(startTimeRaw) : null;
@@ -597,8 +633,8 @@
           team2: item.team_2 || item.team2 || item.teamB || (title && title.includes('vs') ? title.split('vs')[1].trim() : ''),
           eventName: tournament || 'অন্যান্য',
           status: status,
-          thumb: thumb,
-          m3u8Url: m3u8Url,
+          thumb: thumbUrl || 'https://via.placeholder.com/1080x810/1e1e1e/888?text=No+Image',
+          streamUrl: matchedStreamUrl, // M3U থেকে পাওয়া স্ট্রিম URL
           startTime: startTime,
           startTimeRaw: startTimeRaw
         };
@@ -607,11 +643,11 @@
       updateCounters();
       render();
       startCountdownUpdater();
-    })
-    .catch(err => {
+    } catch (err) {
       console.error(err);
-      document.getElementById("eventsContainer").innerHTML = `<div style="padding:40px; color:red; text-align:center;">ডাটা লোড হয়নি</div>`;
-    });
+      document.getElementById("eventsContainer").innerHTML = `<div style="padding:40px; color:red; text-align:center;">JSON ডাটা লোড হয়নি</div>`;
+    }
+  }
 
   // ---------- কাউন্টার আপডেট ----------
   function updateCounters() {
@@ -709,7 +745,6 @@
         extraHtml = startDisplay + countdownDisplay;
       } else if (m.status === 'COMPLETED') {
         const startStr = m.startTimeRaw ? m.startTimeRaw : '';
-        // Ending Time দেখাচ্ছি (startTime কেই শেষ সময় ধরে)
         let startDisplay = startStr ? `<div class="info-row"><span class="info-label">📅 Ending Time:</span><span class="info-value">${escapeHtml(startStr)}</span></div>` : '';
         let endedDisplay = '';
         if (m.startTime) {
@@ -719,18 +754,19 @@
           endedDisplay = `<div class="countdown-timer"><span class="timer-label">⏳ Match Ended:</span><span class="timer-value">Finished</span></div>`;
         }
         extraHtml = startDisplay + endedDisplay;
-      } else if (m.status === 'LIVE') {
-        // live তে কিছু দেখানোর দরকার নেই (শুধু বাটন)
       }
-
-      // button based on status
+      
+      // button based on status and stream availability
       let buttonHtml = '';
       if (m.status === 'LIVE') {
-        buttonHtml = `<button class="watch-btn" data-m3u8="${m.m3u8Url}" data-fulltitle="${escapeHtml(matchDisplayTitle)}">▶ Watch This Match Play</button>`;
+        if (m.streamUrl) {
+          buttonHtml = `<button class="watch-btn" data-stream="${m.streamUrl}" data-fulltitle="${escapeHtml(matchDisplayTitle)}">▶ Watch This Match Live</button>`;
+        } else {
+          buttonHtml = `<button class="support-btn" style="background:#6c757d;" disabled>⚠️ Stream Not Available</button>`;
+        }
       } else if (m.status === 'UPCOMING') {
         buttonHtml = `<button class="support-btn" data-smart="true">🤝 Support Me</button>`;
       } else if (m.status === 'COMPLETED') {
-        // finished ম্যাচেও support me বাটন, কিন্তু লেখা লম্বা, তাই ছোট ফন্ট
         buttonHtml = `<button class="support-btn small-text" data-smart="true">📌 Match Finished Watch Another Match</button>`;
       }
 
@@ -756,19 +792,26 @@
     document.querySelectorAll('.watch-btn').forEach(btn => {
       btn.addEventListener('click', function(e) {
         e.preventDefault();
-        const url = this.getAttribute('data-m3u8');
+        const streamUrl = this.getAttribute('data-stream');
         const title = this.getAttribute('data-fulltitle') || 'ম্যাচ';
-        if (url && url !== '#') openPlayer(url, title);
+        if (streamUrl) {
+          openPlayer(streamUrl, title);
+        } else {
+          alert("স্ট্রিমিং লিংক পাওয়া যায়নি!");
+        }
       });
     });
 
     // সাপোর্ট বাটন ইভেন্ট (আপকামিং এবং ফিনিশড)
     document.querySelectorAll('.support-btn').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const randomLink = SMART_LINKS[Math.floor(Math.random() * SMART_LINKS.length)];
-        window.open(randomLink, '_blank');
-      });
+      // ডিজেবল না হলে এবং smart অ্যাট্রিবিউট থাকলে
+      if (!btn.hasAttribute('disabled')) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const randomLink = SMART_LINKS[Math.floor(Math.random() * SMART_LINKS.length)];
+          window.open(randomLink, '_blank');
+        });
+      }
     });
   }
 
@@ -843,7 +886,6 @@
     smartIframe.src = SMART_LINKS[Math.floor(Math.random() * SMART_LINKS.length)];
 
     modal.style.display = 'block';
-
     setTimeout(() => initPlayer(url, WATERMARK_URL), 100);
   }
 
@@ -851,7 +893,6 @@
   function closeModal() {
     const modal = document.getElementById('videoModal');
     modal.style.display = 'none';
-
     if (clapprPlayer?.destroy) clapprPlayer.destroy();
     clapprPlayer = null;
     document.getElementById('player').innerHTML = '';
@@ -859,7 +900,6 @@
   }
 
   document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       const modal = document.getElementById('videoModal');
@@ -872,6 +912,8 @@
     return unsafe.replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":"&#039;" })[c]);
   }
 
+  // ---------- সবকিছু শুরু ----------
+  fetchAndPrepareData();
 })();
 </script>
 </body>
